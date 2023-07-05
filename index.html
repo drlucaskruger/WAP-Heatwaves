@@ -1344,6 +1344,28 @@ if (window.hljs) {
 
 
 
+<style type="text/css">
+/* for pandoc --citeproc since 2.11 */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
 
 
 
@@ -1540,7 +1562,7 @@ Rebolledo</h4>
 <div id="background" class="section level2">
 <h2>Background</h2>
 <p>We use <a href="https://robwschlegel.github.io/heatwaveR/index.html">heattwavesR
-package</a> to extract period and grid relative with our porpouses.</p>
+package</a> to extract period and grid relative with our porpouses <span class="citation">(<a href="#ref-heatwavesR" role="doc-biblioref">Schlegel &amp; Smit, 2018</a>)</span></p>
 </div>
 <div id="load-packages" class="section level2">
 <h2>Load packages</h2>
@@ -1620,6 +1642,16 @@ system.time(
 </div>
 <div id="plot-data" class="section level2">
 <h2>Plot data</h2>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2 class="unnumbered">References</h2>
+<div id="refs" class="references csl-bib-body hanging-indent" line-spacing="2">
+<div id="ref-heatwavesR" class="csl-entry">
+Schlegel, R. W., &amp; Smit, A. J. (2018). <span class="nocase">heatwaveR</span>: A central algorithm for the detection
+of heatwaves and cold-spells. <em>Journal of Open Source Software</em>,
+<em>3</em>(27), 821. <a href="https://doi.org/10.21105/joss.00821">https://doi.org/10.21105/joss.00821</a>
+</div>
+</div>
 </div>
 
 

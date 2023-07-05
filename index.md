@@ -4,8 +4,8 @@ title: "Detection of extreme heatwaves and low sea ice cover in the Antarctic Pe
 subtitle: "Sumplementary document"
 author: "Lucas Krüger, Maurício Mardones, Lorena Rebolledo"
 date:  "05 July, 2023"
-#bibliography: seaice.bib
-#csl: apa.csl
+bibliography: heatwave.bib
+csl: apa.csl
 link-citations: yes
 linkcolor: blue
 output:
@@ -31,7 +31,7 @@ editor_options:
 
 ## Background
 
-We use [heattwavesR package](https://robwschlegel.github.io/heatwaveR/index.html) to extract period and grid relative with our porpouses.
+We use [heattwavesR package](https://robwschlegel.github.io/heatwaveR/index.html) to extract period and grid relative with our porpouses [@heatwavesR]
 
 
 ## Load packages
@@ -126,3 +126,5 @@ system.time(
 ## Data handling
 
 ## Plot data
+
+## References
