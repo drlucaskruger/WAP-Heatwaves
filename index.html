@@ -1590,14 +1590,11 @@ dl_years1 &lt;- data.frame(date_index = 1:6,
 
 dl_years2&lt;-data.frame(date_index = 1:2,
                       start = as.Date(c(&quot;2018-01-01&quot;,&quot;2021-01-01&quot;)),
-                      end = as.Date(c(&quot;2020-12-31&quot;,&quot;2022-06-30&quot;)))
-
-# Download all of the data with one nested request
-# The time this takes depends on connection speed
-# download on two separated commands was the solution to the download not to crash
-
-
-system.time(
+                      end = as.Date(c(&quot;2020-12-31&quot;,&quot;2022-06-30&quot;)))</code></pre>
+<p>Download all of the data with one nested request. The time this takes
+depends on connection speed download on two separated commands was the
+solution to the download not to crash</p>
+<pre class="r"><code>system.time(
   OISST_data &lt;- dl_years2 %&gt;% 
     group_by(date_index) %&gt;% 
     group_modify(~OISST_sub_dl(.x)) %&gt;% 

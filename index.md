@@ -93,12 +93,15 @@ dl_years1 <- data.frame(date_index = 1:6,
 dl_years2<-data.frame(date_index = 1:2,
                       start = as.Date(c("2018-01-01","2021-01-01")),
                       end = as.Date(c("2020-12-31","2022-06-30")))
-
-# Download all of the data with one nested request
-# The time this takes depends on connection speed
-# download on two separated commands was the solution to the download not to crash
+```
 
 
+Download all of the data with one nested request. 
+The time this takes depends on connection speed download on two separated commands was the solution to the download not to crash
+
+
+
+```r
 system.time(
   OISST_data <- dl_years2 %>% 
     group_by(date_index) %>% 

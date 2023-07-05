@@ -28,7 +28,8 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE)
 ```
 
 
@@ -72,7 +73,6 @@ th<- theme(axis.text=element_text(size=12, face="bold",colour="grey30"),
 ## Download data
 
 ```{r eval=FALSE}
-
 #---------- Download NOAA erdap optimum interpolation SST and SIC----
 # The information for the NOAA OISST data
 #rerddap::info(datasetid = "ncdcOisst21Agg_LonPM180", url = "https://coastwatch.pfeg.noaa.gov/erddap/")
@@ -98,12 +98,14 @@ dl_years1 <- data.frame(date_index = 1:6,
 dl_years2<-data.frame(date_index = 1:2,
                       start = as.Date(c("2018-01-01","2021-01-01")),
                       end = as.Date(c("2020-12-31","2022-06-30")))
-
-# Download all of the data with one nested request
-# The time this takes depends on connection speed
-# download on two separated commands was the solution to the download not to crash
+```
 
 
+Download all of the data with one nested request. 
+The time this takes depends on connection speed download on two separated commands was the solution to the download not to crash
+
+
+```{r eval=FALSE}
 system.time(
   OISST_data <- dl_years2 %>% 
     group_by(date_index) %>% 
@@ -120,7 +122,7 @@ system.time(
     dplyr::select(lon, lat, t, temp,ice)
 ) 
 
-``` 
+```
 
 ## Data handling
 
