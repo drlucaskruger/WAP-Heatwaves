@@ -31,7 +31,7 @@ editor_options:
 
 ## Background
 
-We use [heattwavesR package](https://robwschlegel.github.io/heatwaveR/index.html) to extract period and grid relative with our porpouses [@heatwavesR]
+We use [heattwavesR package](https://robwschlegel.github.io/heatwaveR/index.html) to extract period and grid relative with our porpouses [@heatwavesR]. This package use @reraddp2023 source `reraddp` package describe in [this repo](https://github.com/ropensci/rerddap) and with this [documentation](https://cran.r-project.org/web/packages/rerddap/rerddap.pdf).
 
 
 ## Load packages
