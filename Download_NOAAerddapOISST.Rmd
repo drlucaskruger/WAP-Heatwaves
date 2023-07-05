@@ -83,7 +83,7 @@ base::system.time(
 ) # 518 seconds, ~100 seconds per batch
 
 
-base::saveRDS(OISST_data, file = "D:/HeatWaves/Krill/Data/OISST_data.Rds")
+#base::saveRDS(OISST_data, file = "D:/HeatWaves/Krill/Data/OISST_data.Rds")
 ```
 
 
