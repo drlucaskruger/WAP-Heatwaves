@@ -1,19 +1,39 @@
 ---
-title: Detection of extreme heatwaves and low sea ice cover in the Antarctic Peninsula
- for evaluation of effects over Krill
+title: "Detection of extreme heatwaves and low sea ice cover in the Antarctic Peninsula
+ for evaluation of effects over Krill"
+subtitle: "Sumplementary document"
 author: "Lucas Krüger, Maurício Mardones, Lorena Rebolledo"
-date: "`r Sys.Date()`"
-output: html_document
+date:  "05 July, 2023"
+#bibliography: seaice.bib
+#csl: apa.csl
+link-citations: yes
+linkcolor: blue
+output:
+  html_document:
+    keep_md: true
+    toc: true
+    toc_deep: 3
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+    theme: cosmo
+    fontsize: 0.9em
+    linestretch: 1.7
+    html-math-method: katex
+    self-contained: true
+    code-tools: true
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
+
 
 ## Load packages
 
-```{r, echo=FALSE}
 
+```r
 #remotes::install_github("ropensci/rerddap")
 
 library(dplyr) # A staple for modern data management in R
@@ -28,15 +48,13 @@ library(patchwork) # for joining plots
 library(raster) #sp is going to retire
 library(terra) # for spatial objects
 library(sf)# for spatial objects
-
-
-
 ```
 
 ## Set plot themes (panel spacing will be useful)
 
 
-```{r, echo=FALSE}
+
+```r
 th<- theme(axis.text=element_text(size=12, face="bold",colour="grey30"),
            axis.title=element_text(size=12,face="bold"),
            legend.text = element_text(size=12),
@@ -44,13 +62,12 @@ th<- theme(axis.text=element_text(size=12, face="bold",colour="grey30"),
            panel.grid.minor = element_blank(),
            title =element_text(size=12, face="bold",colour="black"),
            panel.spacing = unit(1, "lines")) # theme for plots
-
 ```
 
-#Download data
+## Download data
 
-```{r}
 
+```r
 #---------- Download NOAA erdap optimum interpolation SST and SIC----
 # The information for the NOAA OISST data
 #rerddap::info(datasetid = "ncdcOisst21Agg_LonPM180", url = "https://coastwatch.pfeg.noaa.gov/erddap/")
@@ -97,10 +114,8 @@ system.time(
     ungroup() %>% 
     dplyr::select(lon, lat, t, temp,ice)
 ) 
+```
 
+## Data handling
 
-
-``` 
-
-
-
+## Plot data

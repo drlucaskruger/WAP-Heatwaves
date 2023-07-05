@@ -1,18 +1,40 @@
 ---
-title: Detection of extreme heatwaves and low sea ice cover in the Antarctic Peninsula
- for evaluation of effects over Krill
+title: "Detection of extreme heatwaves and low sea ice cover in the Antarctic Peninsula
+ for evaluation of effects over Krill"
+subtitle: "Sumplementary document"
 author: "Lucas Krüger, Maurício Mardones, Lorena Rebolledo"
-date: "`r Sys.Date()`"
-output: html_document
+date:  "`r format(Sys.time(), '%d %B, %Y')`"
+#bibliography: seaice.bib
+#csl: apa.csl
+link-citations: yes
+linkcolor: blue
+output:
+  html_document:
+    keep_md: true
+    toc: true
+    toc_deep: 3
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+    theme: cosmo
+    fontsize: 0.9em
+    linestretch: 1.7
+    html-math-method: katex
+    self-contained: true
+    code-tools: true
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
 ## Load packages
 
-```{r, echo=FALSE}
+```{r, message=FALSE}
 
 #remotes::install_github("ropensci/rerddap")
 
@@ -36,7 +58,7 @@ library(sf)# for spatial objects
 ## Set plot themes (panel spacing will be useful)
 
 
-```{r, echo=FALSE}
+```{r}
 th<- theme(axis.text=element_text(size=12, face="bold",colour="grey30"),
            axis.title=element_text(size=12,face="bold"),
            legend.text = element_text(size=12),
@@ -47,9 +69,9 @@ th<- theme(axis.text=element_text(size=12, face="bold",colour="grey30"),
 
 ```
 
-#Download data
+## Download data
 
-```{r}
+```{r eval=FALSE}
 
 #---------- Download NOAA erdap optimum interpolation SST and SIC----
 # The information for the NOAA OISST data
@@ -98,9 +120,8 @@ system.time(
     dplyr::select(lon, lat, t, temp,ice)
 ) 
 
-
-
 ``` 
 
+## Data handling
 
-
+## Plot data
