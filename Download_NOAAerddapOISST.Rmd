@@ -53,7 +53,7 @@ OISST_sub_dl <- function(time_df){
                                 fields = c("sst","ice"))$data %>% 
     dplyr::mutate(time = base::as.Date(stringr::str_remove(time, "T12:00:00Z"))) %>% 
     dplyr::rename(t = time, temp = sst, sic=ice,lon = longitude, lat = latitude) %>% 
-    dplyr::select(lon, lat, t, temp) %>% 
+    dplyr::select(lon, lat, t, temp, sic) %>% 
     stats::na.omit()
 }
 
