@@ -1,0 +1,89 @@
+---
+title: Detection of extreme heatwaves and low sea ice cover in the Antarctic Peninsula  for
+  evaluation of effects over Krill
+author: "Lucas Krüger, Maurício Mardones, Lorena Rebolledo"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#---------- Download NOAA erddap optimum interpolation SST----
+
+#this part of the script is a modification of the scripts in the heatwaveR vignette
+#available at https://robwschlegel.github.io/heatwaveR/articles/OISST_preparation.html
+
+
+```{r, echo =FALSE}
+#---------- Download NOAA erdap optimum interpolation SST----
+
+# The packages we will use
+library(dplyr) # A staple for modern data management in R
+library(lubridate) # Useful functions for dealing with dates
+library(ggplot2) # The preferred library for data visualisation
+library(tidync) # For easily dealing with NetCDF data
+library(rerddap) # For easily downloading subsets of data
+library(doParallel) # For parallel processing
+
+
+```
+
+# The information for the NOAA OISST data
+
+```{r, echo=FALSE}
+
+
+rerddap::info(datasetid = "ncdcOisst21Agg_LonPM180", url = "https://coastwatch.pfeg.noaa.gov/erddap/")
+
+```
+
+# This function downloads and prepares data based on user provided start and end dates
+
+```{r}
+
+OISST_sub_dl <- function(time_df){
+  OISST_dat <- rerddap::griddap(datasetx = "ncdcOisst21Agg_LonPM180",
+                                url = "https://coastwatch.pfeg.noaa.gov/erddap/", 
+                                time = c(time_df$start, time_df$end), 
+                                zlev = c(0, 0),
+                                latitude = c(-76, -55),
+                                longitude = c(-90, -30),
+                                fields = c("sst","ice"))$data %>% 
+    dplyr::mutate(time = base::as.Date(stringr::str_remove(time, "T12:00:00Z"))) %>% 
+    dplyr::rename(t = time, temp = sst, sic=ice,lon = longitude, lat = latitude) %>% 
+    dplyr::select(lon, lat, t, temp) %>% 
+    stats::na.omit()
+}
+
+
+
+dl_years <- data.frame(date_index = 1:8,
+                        start = as.Date(c("1985-01-01","1990-01-01",
+                                          "1995-01-01", "2000-01-01", "2006-01-01", 
+                                          "2013-01-01","2019-01-01","2021-01-01")),
+                        
+                        end = as.Date(c("1989-12-31","1994-12-31",
+                                        "1999-12-31", "2005-12-31", "2012-12-31", 
+                                        "2018-12-31","2020-12-31","2022-12-31")))
+
+```
+
+###download and save data
+
+```{r}
+
+base::system.time(
+  OISST_data <- dl_years %>% 
+    dplyr::group_by(date_index) %>% 
+    dplyr::group_modify(~OISST_sub_dl(.x)) %>% 
+    dplyr::ungroup() %>% 
+    dplyr::select(lon, lat, t, temp,sic)
+) # 518 seconds, ~100 seconds per batch
+
+
+base::saveRDS(OISST_data, file = "D:/HeatWaves/Krill/Data/OISST_data.Rds")
+```
+
+
