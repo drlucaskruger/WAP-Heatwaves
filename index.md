@@ -29,6 +29,10 @@ editor_options:
 
 
 
+## Background
+
+We use [heattwavesR package](https://robwschlegel.github.io/heatwaveR/index.html) to extract period and grid relative with our porpouses.
+
 
 ## Load packages
 
