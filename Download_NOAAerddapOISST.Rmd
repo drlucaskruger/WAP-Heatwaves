@@ -10,7 +10,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-#---------- Download NOAA erddap optimum interpolation SST----
+#  Download NOAA erddap optimum interpolation SST----
 
 #this part of the script is a modification of the scripts in the heatwaveR vignette
 #available at https://robwschlegel.github.io/heatwaveR/articles/OISST_preparation.html
