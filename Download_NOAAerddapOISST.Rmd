@@ -1,6 +1,7 @@
 ---
 title: Detection of extreme heatwaves and low sea ice cover in the Antarctic Peninsula  for
   evaluation of effects over Krill
+subtitle: "krill Analysis"
 author: "Lucas Krüger, Maurício Mardones, Lorena Rebolledo"
 date: "`r Sys.Date()`"
 output: html_document
