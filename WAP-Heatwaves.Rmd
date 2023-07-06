@@ -893,9 +893,10 @@ ggplot(evenS,aes(date_peak,duration,colour=Season,linetype=Season))+
 
 ### example for 2022
 (event_line(eSW.t, spread = 200, metric = "intensity_cumulative",x=t,y=tMax,
-           start_date = "2022-01-01", end_date = "2022-12-31",category=T))/
+           start_date = "2022-04-01", end_date = "2022-12-31",category=T))/
 
 (event_line(eSW.sic, spread = 200, metric = "intensity_cumulative",x=t,y=sicMean,
-           start_date = "2022-01-01", end_date = "2022-12-31",category=T))
+           start_date = "2022-04-01", end_date = "2022-12-31",category=F))
+
 
 ```
