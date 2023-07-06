@@ -27,7 +27,7 @@ library(udunits2) # spatial units library
 library(patchwork) # for joining plots
 library(raster) #sp is going to retire
 library(terra) # for spatial objects
-library(sf)# for spatial objects
+library(sf)# 
 
 
 
