@@ -788,7 +788,7 @@ gc()
 ###----------- calculating marine heatwaves-------------
 
 
-```{r}
+```{r,echo=FALSE}
 
 library(heatwaveR)
 
