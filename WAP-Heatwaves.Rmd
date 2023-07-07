@@ -31,6 +31,9 @@ library(raster)
 library(terra)
 library(sf)
 
+library(mapdata)
+library(mapproj)
+
 ```
 
 # The information for the NOAA OISST data
@@ -50,16 +53,38 @@ rerddap::info(datasetid = "ncdcOisst21Agg_LonPM180", url = "https://coastwatch.p
 # spatial units to use
 
 
-shp<-shapefile("D:/HeatWaves/Krill/Data/Shapefiles/Clipped_Strata.shp")
+shp<-shapefile("D:/HeatWaves/Krill/Data/Shapefiles/Clipped_StrataGCS.shp")
 
 
 crs=CRS( "+proj=longlat +datum=WGS84 +no_defs") # coordinate reference system CRS
 
-shp2<-spTransform(shp,crs)
+shp2<-spTransform(shp,crs) # be sure it is in the correct coordinate system
 
-plot(shp2)
 
-shp.sf<-st_as_sf(shp2)
+#load antarctic peninsula shapefile to plot it
+# this shapefile was cut from high resolution file from the SCAR Antarctic Digital Database, 2023
+# Gerrish, L., Ireland, L., Fretwell, P., & Cooper, P. (2023). High resolution vector polygons of the Antarctic coastline (7.7) [Data set]. UK Polar Data Centre, Natural Environment Research Council, UK Research & Innovation. https://doi.org/10.5285/0be5339c-9d35-44c9-a10f-da4b5356840b'
+
+wap<-shapefile("D:/HeatWaves/Krill/Data/Shapefiles/peninsula_correct.shp") 
+
+
+# plot map with shapefile (Fig 1)
+shpdf<-data.frame(shp2)
+
+ggplot()+
+  
+  xlab("Longitude")+ylab("Latitude")+
+  theme_bw()+
+    geom_polygon(data=shp2,aes(x = long, y = lat, group = group,label=group),fill="lightblue",colour="black")+
+  geom_polygon(data=wap,aes(x = long, y = lat, group = group))+
+geom_text(data=shpdf,aes(label=ID, 
+            x=Labx,
+            y=Laby),colour="red2",
+            size = 3, hjust=0, vjust=-1) +
+      coord_quickmap(xlim=c(-75,-50),ylim=c(-75, -59), expand = TRUE, clip = "on")
+
+
+shp.sf<-st_as_sf(shp)
 unique(shp.sf$ID)
 
 #Extract coordinates and generates a bounding box 
@@ -803,22 +828,22 @@ tMax_clim.SW <- ts2clm(data = SW,
 # iMin thresholds
 
 sicMean_clim.BS <- ts2clm(data = BS, 
-                     y = sicMean, climatologyPeriod = c("1985-01-01", "2022-12-31"), pctile = 25)
+                     y = sicMean, climatologyPeriod = c("1985-01-01", "2022-12-31"), pctile = 20)
 sicMean_clim.EI <- ts2clm(data = EI, 
-                     y = sicMean, climatologyPeriod = c("1986-01-01", "2022-12-31"), pctile = 25)
+                     y = sicMean, climatologyPeriod = c("1986-01-01", "2022-12-31"), pctile = 20)
 sicMean_clim.EX <- ts2clm(data = EX, 
-                     y = sicMean, climatologyPeriod = c("1985-01-01", "2022-12-31"), pctile = 25)
+                     y = sicMean, climatologyPeriod = c("1985-01-01", "2022-12-31"), pctile = 20)
 
 sicMean_clim.JI <- ts2clm(data = JI, 
-                     y = sicMean, climatologyPeriod = c("1985-01-01", "2022-12-31"), pctile = 25)
+                     y = sicMean, climatologyPeriod = c("1985-01-01", "2022-12-31"), pctile = 20)
 sicMean_clim.SS <- ts2clm(data = SS, 
-                     y = sicMean, climatologyPeriod = c("1985-01-01", "2022-12-31"), pctile = 25)
+                     y = sicMean, climatologyPeriod = c("1985-01-01", "2022-12-31"), pctile = 20)
 sicMean_clim.SW <- ts2clm(data = SW, 
-                     y = sicMean, climatologyPeriod = c("1985-01-01", "2022-12-31"), pctile = 25)
+                     y = sicMean, climatologyPeriod = c("1985-01-01", "2022-12-31"), pctile = 20)
 
 
 
-#DETECT EVENTS
+#DETECT alldfS
 eBS.t <- detect_event(data = tMax_clim.BS, y = tMax,minDuration = 5,maxGap = 7) 
 eEI.t <- detect_event(data = tMax_clim.EI, y = tMax,minDuration = 5,maxGap = 7) 
 eEX.t <- detect_event(data = tMax_clim.EX, y = tMax,minDuration = 5,maxGap = 7) 
@@ -834,23 +859,137 @@ eJI.sic <- detect_event(data = sicMean_clim.JI, y = sicMean,minDuration = 3,maxG
 eSS.sic <- detect_event(data = sicMean_clim.SS, y = sicMean,minDuration = 3,maxGap = 7,coldSpells = T) 
 eSW.sic <- detect_event(data = sicMean_clim.SW, y = sicMean,minDuration = 3,maxGap = 7,coldSpells = T) 
 
-bsevenT<-data.frame(eBS.t$event,sector=c("BS")) # Elephant Island events
-elevenT<-data.frame(eEI.t$event,sector=c("EI")) # Elephant Island events
-exevenT<-data.frame(eEX.t$event,sector=c("EX")) # Elephant Island events
-jievenT<-data.frame(eJI.t$event,sector=c("JI")) # Elephant Island events
-ssevenT<-data.frame(eSS.t$event,sector=c("SS")) # Elephant Island events
-swevenT<-data.frame(eSW.t$event,sector=c("SW")) # Elephant Island events
 
-bsevenS<-data.frame(eBS.sic$event,sector=c("BS")) # Elephant Island events
-elevenS<-data.frame(eEI.sic$event,sector=c("EI")) # Elephant Island events
-exevenS<-data.frame(eEX.sic$event,sector=c("EX")) # Elephant Island events
-jievenS<-data.frame(eJI.sic$event,sector=c("JI")) # Elephant Island events
-ssevenS<-data.frame(eSS.sic$event,sector=c("SS")) # Elephant Island events
-swevenS<-data.frame(eSW.sic$event,sector=c("SW")) # Elephant Island events
+#export climatologies and create dataframes
+
+bsclimT<-data.frame(eBS.t$climatology,sector=c("BS")) 
+elclimT<-data.frame(eEI.t$climatology,sector=c("EI")) 
+exclimT<-data.frame(eEX.t$climatology,sector=c("EX")) 
+jiclimT<-data.frame(eJI.t$climatology,sector=c("JI")) 
+ssclimT<-data.frame(eSS.t$climatology,sector=c("SS")) 
+swclimT<-data.frame(eSW.t$climatology,sector=c("SW")) 
+
+bsclimS<-data.frame(eBS.sic$climatology,sector=c("BS")) 
+elclimS<-data.frame(eEI.sic$climatology,sector=c("EI")) 
+exclimS<-data.frame(eEX.sic$climatology,sector=c("EX")) 
+jiclimS<-data.frame(eJI.sic$climatology,sector=c("JI")) 
+ssclimS<-data.frame(eSS.sic$climatology,sector=c("SS")) 
+swclimS<-data.frame(eSW.sic$climatology,sector=c("SW")) 
+
+climT<-rbind(bsclimT,elclimT,exclimT,jiclimT,ssclimT,swclimT) # join data
+climS<-rbind(bsclimS,elclimS,exclimS,jiclimS,ssclimS,swclimS) # join data
+
+# plots for temperature and sea ice
+
+# Create category breaks and select slice of data.frame
+
+
+# Set line colours
+lineColCat <- c(
+  "Temperature" = "black",
+  "Climatology" = "gray20",
+  "Threshold" = "darkgreen",
+  "2x Threshold" = "darkgreen",
+  "3x Threshold" = "darkgreen",
+  "4x Threshold" = "darkgreen"
+  )
+
+# Set category fill colours
+fillColCat <- c(
+  "Moderate" = "#ffc866",
+  "Strong" = "#ff6900",
+  "Severe" = "#9e0000",
+  "Extreme" = "#2d0000"
+  )
+
+# Set category fill colours
+fillColCat2 <- c(
+  "Moderate" = "#ffc866",
+  "Normal" = "#85B7CC"
+  )
+
+lineColCat2 <- c(
+  "Sea Ice" = "black",
+  "Climatology" = "blue3",
+  "Threshold" = "red3"
+  )
+# Create category breaks 
+climT
+climT$diff = climT$thresh - climT$seas
+climT$thresh_2x = climT$thresh + climT$diff
+climT$thresh_3x = climT$thresh_2x + climT$diff
+climT$thresh_4x = climT$thresh_3x + climT$diff
+
+
+climS
+climS$diff = climS$thresh - climS$seas
+climS$thresh_2x = climS$thresh + climS$diff
+climS$thresh_3x = climS$thresh_2x + climS$diff
+climS$thresh_4x = climS$thresh_3x + climS$diff
+
+
+#figure 2
+(ggplot(data = subset(climT,t>'2022-03-31'), aes(x = t, y = tMax)) +
+  geom_flame(aes(y2 = thresh, fill = "Moderate")) +
+  geom_flame(aes(y2 = thresh_2x, fill = "Strong")) +
+  geom_flame(aes(y2 = thresh_3x, fill = "Severe")) +
+  geom_flame(aes(y2 = thresh_4x, fill = "Extreme")) +
+  geom_line(aes(y = thresh_2x, col = "2x Threshold"), size = 0.7, linetype = "dashed") +
+  geom_line(aes(y = thresh_3x, col = "3x Threshold"), size = 0.7, linetype = "dotdash") +
+  geom_line(aes(y = thresh_4x, col = "4x Threshold"), size = 0.7, linetype = "dotted") +
+  geom_line(aes(y = seas, col = "Climatology"), size = 0.7) +
+  geom_line(aes(y = thresh, col = "Threshold"), size = 0.7) +
+  geom_line(aes(y = tMax, col = "Temperature"), size = 0.6) +
+  scale_colour_manual(name = NULL, values = lineColCat,
+                      breaks = c("Temperature", "Climatology", "Threshold",
+                                 "2x Threshold", "3x Threshold", "4x Threshold")) +
+  scale_fill_manual(name = NULL, values = fillColCat, guide = FALSE) +
+  scale_x_date(date_labels = "%b %Y") +
+  guides(colour = guide_legend(override.aes = list(linetype = c("solid", "solid", "solid",
+                                                                "dashed", "dotdash", "dotted"),
+                                                   size = c(0.6, 0.7, 0.7, 0.7, 0.7, 0.7)))) +
+  labs(y = "Temperature [°C]", x = NULL)+
+  facet_wrap(sector~.)+theme_bw()+theme(panel.spacing.x = unit(2, "lines"))+
+  ggtitle(label="a. High temperature extremes"))/
+  
+  
+  
+  
+  (ggplot(data = subset(climS,t>'2022-03-31'), aes(x = t, y = sicMean)) +
+     geom_flame(aes(y = sicMean,y2=thresh, fill = "Normal")) +
+     geom_flame(aes(y = thresh,y2=sicMean, fill = "Moderate")) +
+     geom_line(aes(y = seas, col = "Climatology"), size = 0.7,linetype="dashed") +
+     geom_line(aes(y = thresh, col = "Threshold"), size = 0.7,linetype="dotdash") +
+     geom_line(aes(y = sicMean, col = "Sea Ice"), size = 0.6) +
+     scale_colour_manual(name = NULL, values = lineColCat2,
+                         breaks = c("Sea Ice", "Climatology","Threshold")) +
+     scale_fill_manual(name = NULL, values = fillColCat2, guide = FALSE) +
+     scale_x_date(date_labels = "%b %Y") +
+     guides(colour = guide_legend(override.aes = list(linetype = c("solid","dashed",
+                                                                   "dotdash")))) +
+     labs(y = "Sea ice cover [fraction]", x = NULL)+
+     facet_wrap(sector~.)+theme_bw()+theme(panel.spacing.x = unit(2, "lines"))+
+     
+     ggtitle(label="b. Low sea ice extremes"))
+
+#export events and creat data frame
+
+bsevenT<-data.frame(eBS.t$event,sector=c("BS")) 
+elevenT<-data.frame(eEI.t$event,sector=c("EI")) 
+exevenT<-data.frame(eEX.t$event,sector=c("EX")) 
+jievenT<-data.frame(eJI.t$event,sector=c("JI")) 
+ssevenT<-data.frame(eSS.t$event,sector=c("SS")) 
+swevenT<-data.frame(eSW.t$event,sector=c("SW")) 
+
+bsevenS<-data.frame(eBS.sic$event,sector=c("BS")) 
+elevenS<-data.frame(eEI.sic$event,sector=c("EI")) 
+exevenS<-data.frame(eEX.sic$event,sector=c("EX")) 
+jievenS<-data.frame(eJI.sic$event,sector=c("JI")) 
+ssevenS<-data.frame(eSS.sic$event,sector=c("SS")) 
+swevenS<-data.frame(eSW.sic$event,sector=c("SW")) 
 
 evenT<-rbind(bsevenT,elevenT,exevenT,jievenT,ssevenT,swevenT) # join events data
 evenS<-rbind(bsevenS,elevenS,exevenS,jievenS,ssevenS,swevenS) # join events data
-
 
 evenT$Day<-(decimal_date(evenT$date_peak)-year(evenT$date_peak))*365 # day of the year
 evenT$quart<-quarter(evenT$date_peak) # tri-mensual classification
@@ -874,29 +1013,153 @@ evenT$Season<-factor(evenT$Season,levels=c("JFM","AMJ","JAS","OND")) # order lev
 
 evenS$Season<-factor(evenS$Season,levels=c("JFM","AMJ","JAS","OND")) # order levels
 
-#PLOT
-
-ggplot(evenT,aes(date_peak,duration,colour=Season,linetype=Season))+
- geom_lolli()+
-  theme_bw()+ylab("Duration (days)")+
-  scale_colour_manual(values=c("red","green4","blue","orange"))+
-  facet_wrap(sector~.)+
-  xlab("Date peak")
-
-ggplot(evenS,aes(date_peak,duration,colour=Season,linetype=Season))+
- geom_lolli()+
-  theme_bw()+ylab("Duration (days)")+
-  scale_colour_manual(values=c("red","green4","blue","orange"))+
-  facet_wrap(sector~.)+
-  xlab("Date peak")
+#PLOT figure 3
 
 
-### example for 2022
-(event_line(eSW.t, spread = 200, metric = "intensity_cumulative",x=t,y=tMax,
-           start_date = "2022-04-01", end_date = "2022-12-31",category=T))/
 
-(event_line(eSW.sic, spread = 200, metric = "intensity_cumulative",x=t,y=sicMean,
-           start_date = "2022-04-01", end_date = "2022-12-31",category=F))
+(ggplot(subset(evenT,date_peak>'2009-12-31'),aes(date_peak,duration,colour=Season,linetype=Season))+
+    geom_lolli()+
+    theme_bw()+ylab("Duration (days)")+
+    scale_colour_manual(values=c("red","green4","blue","orange"))+
+    facet_wrap(sector~.)+
+    xlab("Date peak")+
+    ggtitle(label="a. Duration of high temperature events"))+
+  
+  (ggplot(subset(evenT,date_peak>'2009-12-31'),aes(date_peak,intensity_max,colour=Season,linetype=Season))+
+     geom_lolli()+
+     theme_bw()+ylab("Intensity (°C)")+
+     scale_colour_manual(values=c("red","green4","blue","orange"))+
+     facet_wrap(sector~.)+
+     xlab("Date peak")+
+     ggtitle(label="b. Intensity of temperature events"))+
+  
+  (ggplot(subset(evenS,date_peak>'2009-12-31'),aes(date_peak,duration,colour=Season,linetype=Season))+
+     geom_lolli()+
+     theme_bw()+ylab("Duration (days)")+
+     scale_colour_manual(values=c("red","green4","blue","orange"))+
+     facet_wrap(sector~.)+
+     xlab("Date peak")+
+     ggtitle(label="c. Duration of low sea ice events"))+
+
+
+  (ggplot(subset(evenS,date_peak>'2009-12-31'),aes(date_peak,intensity_max,colour=Season,linetype=Season))+
+     geom_lolli()+
+     theme_bw()+ylab("Intensity")+
+     scale_colour_manual(values=c("red","green4","blue","orange"))+
+     facet_wrap(sector~.)+
+     xlab("Date peak")+
+     ggtitle(label="d. Intensity of low sea ice events"))
+
+
+
+head(evenT)
+evenT$Year<-year(evenT$date_peak)
+evenS$Year<-year(evenS$date_peak)
+#summarize per season and year
+
+evenT.S<-plyr::ddply(evenT, c("Year","Season","sector"), summarise,
+            TN=length(duration),
+            TmeanDur=mean(duration),
+            TcumDur=sum(duration),
+            TmeanInt=mean(intensity_mean),
+            TmaxInt=max(intensity_max))
+
+evenS.S<-plyr::ddply(evenS, c("Year","Season","sector"), summarise,
+            SN=length(duration),
+            SmeanDur=mean(duration),
+            ScumDur=sum(duration),
+            SmeanInt=mean(intensity_mean),
+            SmaxInt=max(intensity_max))
+
+
+evesum<-merge(evenT.S,evenS.S,by=c("Year","Season","sector"))
+
+saveRDS(evesum,"D:/HeatWaves/Krill/Data/events_summary.Rds")
+
+summary(evesum)
+
+evesum$TN[is.na(evesum$TN)]<-0
+evesum$TmeanDur[is.na(evesum$TmeanDur)]<-0
+evesum$TcumDur[is.na(evesum$TcumDur)]<-0
+evesum$TmeanInt[is.na(evesum$TmeanInt)]<-0
+evesum$TmaxInt[is.na(evesum$TmaxInt)]<-0
+
+evesum$SN[is.na(evesum$SN)]<-0
+evesum$SmeanDur[is.na(evesum$SmeanDur)]<-0
+evesum$ScumDur[is.na(evesum$ScumDur)]<-0
+evesum$SmeanInt[is.na(evesum$SmeanInt)]<-0
+evesum$SmaxInt[is.na(evesum$SmaxInt)]<-0
+
+
+summary(evesum)
+
+ggplot(data=evesum)+
+    geom_smooth(data=evesum,aes(x=log(TmeanDur+1),y=log(SmeanDur+1)),
+              method="gam",se=F)+
+  
+
+  geom_point(data=evesum,aes(x=log(TmeanDur+1),y=log(SmeanDur+1),colour=Season,shape=Season))+
+  facet_wrap(sector~.)+theme_bw()+
+
+ggplot(data=evesum)+
+    geom_smooth(data=evesum,aes(x=TmaxInt,y=SmaxInt),
+              method="gam",se=F)+
+ 
+
+  geom_point(data=evesum,aes(x=TmaxInt,y=SmaxInt,colour=Season,shape=Season))+
+  facet_wrap(sector~.)+theme_bw()
+
+### there is no  correspondence between temperature and sea ice in most sectors (delayed response? see fig 2)
+
+head(BS)
+
+BS$sector<-c("BS")
+EI$sector<-c("EI")
+EX$sector<-c("EX")
+JI$sector<-c("JI")
+SS$sector<-c("SS")
+SW$sector<-c("SW")
+
+
+alldf<-rbind(BS,EI,EX,JI,SS,SW)
+
+alldf$month<-month(alldf$t)
+alldf$Year<-year(alldf$t)
+alldf$quarter<-quarter(alldf$t)
+
+alldf$Season[alldf$quart=="1"]<-"JFM"
+alldf$Season[alldf$quart=="2"]<-"AMJ"
+alldf$Season[alldf$quart=="3"]<-"JAS"
+alldf$Season[alldf$quart=="4"]<-"OND"
+
+
+adfm<-plyr::ddply(alldf, c("Year","Season","sector"), summarise,
+            tMax=mean(tMax),
+            sicMin=mean(sicMin))
+
+
+#figure 4
+ggplot(adfm,aes(tMax,sicMin))+
+  geom_point(alpha=0.05)+
+   
+  stat_smooth(method="glm", method.args = list(family = "binomial"))+
+  facet_wrap(sector~.)+theme_bw()+
+               xlab("Maximum temperature (°C)")+
+              ylab("Minimum fractional sea ice cover")
+              
+  ggplot(subset(adfm,Season=="AMJ"|Season=="JAS"),aes(Year,tMax))+
+  geom_point(alpha=0.05)+
+  geom_smooth(method="gam",formula=y~s(x,k=8))+
+  theme_bw()+facet_wrap(sector~.)+
+  ylab("Maximum temperature (°C)")+
+
+    
+# figure 5    
+ggplot(subset(adfm,Season=="AMJ"|Season=="JAS"),aes(Year,sicMin))+
+  geom_point(alpha=0.05)+
+  geom_smooth(method="gam",formula=y~s(x,k=8))+
+  theme_bw()+facet_wrap(sector~.)+
+  ylab("Minimum fractional sea ice cover")
 
 
 ```
