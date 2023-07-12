@@ -1140,7 +1140,7 @@ adfm<-plyr::ddply(alldf, c("Year","Season","sector"), summarise,
 
 #figure 4
 ggplot(adfm,aes(tMax,sicMin))+
-  geom_point(alpha=0.05)+
+  geom_point(alpha=0.05)+ 
    
   stat_smooth(method="glm", method.args = list(family = "binomial"))+
   facet_wrap(sector~.)+theme_bw()+

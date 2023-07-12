@@ -98,7 +98,7 @@ shp2<-spTransform(shp,crs) # be sure it is in the correct coordinate system
 # this shapefile was cut from high resolution file from the SCAR Antarctic Digital Database, 2023
 # Gerrish, L., Ireland, L., Fretwell, P., & Cooper, P. (2023). High resolution vector polygons of the Antarctic coastline (7.7) [Data set]. UK Polar Data Centre, Natural Environment Research Council, UK Research & Innovation. https://doi.org/10.5285/0be5339c-9d35-44c9-a10f-da4b5356840b'
 
-wap<-shapefile("D:/HeatWaves/Krill/Data/Shapefiles/peninsula_correct.shp") 
+wap<-shapefile("peninsula_correct.shp") 
 
 
 # plot map with shapefile (Fig 1)
