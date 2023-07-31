@@ -928,6 +928,10 @@ climS$thresh_3x = climS$thresh_2x + climS$diff
 climS$thresh_4x = climS$thresh_3x + climS$diff
 
 
+saveRDS(climS,"D:/HeatWaves/Krill/Data/climatologyICE.Rds")
+saveRDS(climT,"D:/HeatWaves/Krill/Data/climatologyTEMP.Rds")
+
+
 #figure 2
 (ggplot(data = subset(climT,t>'2022-03-31'), aes(x = t, y = tMax)) +
   geom_flame(aes(y2 = thresh, fill = "Moderate")) +
@@ -1053,8 +1057,11 @@ evenS$Season<-factor(evenS$Season,levels=c("JFM","AMJ","JAS","OND")) # order lev
 
 
 head(evenT)
-evenT$Year<-year(evenT$date_peak)
-evenS$Year<-year(evenS$date_peak)
+evenT$Year<-year(evenT$date_start)
+evenS$Year<-year(evenS$date_start)
+
+
+
 #summarize per season and year
 
 evenT.S<-plyr::ddply(evenT, c("Year","Season","sector"), summarise,
