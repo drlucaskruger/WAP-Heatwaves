@@ -1,7 +1,6 @@
 ---
-title: "Detection of extreme heatwaves and low sea ice cover in the Antarctic Peninsula
- for evaluation of effects over Krill"
-subtitle: "Sumplementary document"
+title: "Detection of extreme heatwaves and low sea ice cover in the Antarctic Peninsula for evaluation of effects over Krill"
+subtitle: "Sumplementary Document"
 author: "Lucas Krüger, Maurício Mardones, Lorena Rebolledo"
 date:  "`r format(Sys.time(), '%d %B, %Y')`"
 bibliography: heatwave.bib
