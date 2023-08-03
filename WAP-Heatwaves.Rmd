@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 #available at https://robwschlegel.github.io/heatwaveR/articles/OISST_preparation.html
 
 
-```{r, echo =FALSE}
+```{r, echo =FALSE, message=FALSE}
 #---------- Download NOAA erddap optimum interpolation SST----
 
 # The packages we will use
@@ -48,12 +48,10 @@ rerddap::info(datasetid = "ncdcOisst21Agg_LonPM180", url = "https://coastwatch.p
 # Download and prepare data based on user provided start and end dates using three different requests per geographical strata so it can be run on slow PCs.
 
 ```{r}
-
-
 # spatial units to use
 
 
-shp<-shapefile("D:/HeatWaves/Krill/Data/Shapefiles/Clipped_StrataGCS.shp")
+shp<-shapefile("Clipped_StrataGCS.shp")
 
 
 crs=CRS( "+proj=longlat +datum=WGS84 +no_defs") # coordinate reference system CRS
@@ -65,7 +63,7 @@ shp2<-spTransform(shp,crs) # be sure it is in the correct coordinate system
 # this shapefile was cut from high resolution file from the SCAR Antarctic Digital Database, 2023
 # Gerrish, L., Ireland, L., Fretwell, P., & Cooper, P. (2023). High resolution vector polygons of the Antarctic coastline (7.7) [Data set]. UK Polar Data Centre, Natural Environment Research Council, UK Research & Innovation. https://doi.org/10.5285/0be5339c-9d35-44c9-a10f-da4b5356840b'
 
-wap<-shapefile("D:/HeatWaves/Krill/Data/Shapefiles/peninsula_correct.shp") 
+wap<-shapefile("peninsula_correct.shp") 
 
 
 # plot map with shapefile (Fig 1)
@@ -92,7 +90,10 @@ unique(shp.sf$ID)
 geom<-st_geometry(shp.sf)
 
 bbox_list <- lapply(st_geometry(shp.sf), st_bbox)
+```
 
+
+```{r}
 #min and max coordinates of each strata as data frame
 
 df1<-data.frame(t(as.data.frame((bbox_list[[1]])))) # Elephant
