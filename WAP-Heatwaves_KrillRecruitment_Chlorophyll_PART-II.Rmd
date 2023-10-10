@@ -426,7 +426,7 @@ ggplot(subset(adfm,Season=="AMJ"|Season=="JAS"),aes(Year,sicMin))+
 ```{r}
 
 ### reprocessing climate data 
-### we know sea  might be important during winter, and temperature influences summer productivity
+### we know sea ice might be important during winter, and temperature influences summer productivity
 
 # first, lets re-evaluate events date based on the peak date
 
@@ -454,22 +454,23 @@ evenS$Season[evenS$quart=="4"]<-"OND"
 
 
 WseaIce<-plyr::ddply(subset(evenS,Season=="AMJ"|Season=="JAS"), c("Year","sector"), summarise,
-                     TN=length(duration),
-                     TmeanDur=mean(duration),
-                     TcumDur=sum(duration),
-                     TmeanInt=mean(intensity_mean),
-                     TmaxInt=max(intensity_max))
-
-Stemp<-plyr::ddply(subset(evenS,Season=="JFM"|Season=="OND"), c("Year","sector"), summarise,
                      SN=length(duration),
                      SmeanDur=mean(duration),
                      ScumDur=sum(duration),
                      SmeanInt=mean(intensity_mean),
                      SmaxInt=max(intensity_max))
 
+Stemp<-plyr::ddply(subset(evenT,Season=="JFM"|Season=="OND"), c("Year","sector"), summarise,
+                     TN=length(duration),
+                     TmeanDur=mean(duration),
+                     TcumDur=sum(duration),
+                     TmeanInt=mean(intensity_mean),
+                     TmaxInt=max(intensity_max))
+
+
+
 
 evesum<-merge(WseaIce,Stemp,by=c("Year","sector"),all=T)
-
 
 
 # load climatology data 
@@ -494,7 +495,8 @@ clim$Year<-year(clim$t)
   head(clim)
  
   climWS<-plyr::ddply(subset(clim,Season=="AMJ"|Season=="JAS"), c("Year","sector"), summarise,
-                    SICPeak=max(sicMean),SICmean=mean(sicMean),thresh.y=mean(thresh.y))
+                    SICPeak=max(sicMean),SICmean=mean(sicMean),thresh.y=mean(thresh.y),
+                    Wtemp=max(tMax))
 
 climST<-plyr::ddply(subset(clim,Season=="JFM"|Season=="OND"), c("Year","sector"), summarise,
                    
@@ -574,6 +576,11 @@ lmp2<-lmPerm::lmp(recind~TempMax,data=cwsk,perm="Prob",center=T,singular.ok = F)
 summary(lmp2)
 anova(lmp2)
 
+lmp3<-lmPerm::lmp(recind~Wtemp,data=cwsk,perm="Prob",center=T,singular.ok = F)
+
+summary(lmp3)
+anova(lmp3)
+
 
 ```
 
@@ -597,18 +604,18 @@ eveK$IceCases<-ifelse(eveK$SN>0,"One or more","No cases")
 eveK2<-na.omit(data.frame(eveK[1:2],eveK[5],eveK[16:17]))
 
 
-lmp3<-lmPerm::lmp(recind~IceCases,data=eveK2,perm="Prob",center=T,singular.ok = F)
-
-summary(lmp3)
-
-anova(lmp3)
-
-
-lmp4<-lmPerm::lmp(recind~TempCases,data=eveK2,perm="Prob",center=T,singular.ok = F)
+lmp4<-lmPerm::lmp(recind~IceCases,data=eveK2,perm="Prob",center=T,singular.ok = F, nCycle=1,maxIter=3000)
 
 summary(lmp4)
 
 anova(lmp4)
+
+
+lmp5<-lmPerm::lmp(recind~TempCases,data=eveK2,perm="Prob",center=T,singular.ok = F, nCycle=1,maxIter=3000)
+
+summary(lmp5)
+
+anova(lmp5)
 
 
 # plot
@@ -641,7 +648,6 @@ ggplot(eveK2,aes(IceCases,recind))+geom_boxplot()+
   theme_bw()+xlab("Events")+
   ylab("Recruitment index")+
   ggtitle(label="d. High sea sea surface temperatures")
-
 
 
 ```
@@ -891,12 +897,19 @@ ggplot(wsicL,aes(catsic,chlm))+geom_boxplot()+theme_bw()+
 ```{r}
 
 
-ggplot(wsicL,aes(sst,sic))+
-  geom_smooth(method="gam",formula=y~s(x,k=3))+
-  geom_point()+theme_bw()+
+ggplot()+
+  geom_smooth(data=wsicL,aes(x=sst,y=sic),method="gam",formula=y~s(x,k=3))+
+  geom_point(data=wsicL,aes(x=sst,y=sic,colour=as.factor(Month)))+theme_bw()+
   ylab("Winter Sea Ice Cover")+xlab("Winter Sea Surface Temperature (°C)")
 
+bartlett.test(wsicL$sic,wsicL$Lag)
+shapiro.test(wsicL$sic)
 
+lmp00<-lmPerm::lmp(sic~sst,data=wsicL,perm="Prob",center=T,singular.ok = F,maxIter=2000)
+
+summary(lmp00)
+
+anova(lmp00)
 
 ```
 
