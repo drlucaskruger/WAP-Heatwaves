@@ -69,6 +69,17 @@ wap<-shapefile("peninsula_correct.shp")
 # plot map with shapefile (Fig 1)
 shpdf<-data.frame(shp2)
 
+
+shp2$ID[shp2$ID=="JOIN"]<-"JI"
+shp2$ID[shp2$ID=="Extra"]<-"GS"
+shp2$ID[shp2$ID=="SSIW"]<-"SS"
+
+
+shp2$ID[shp2$ID=="OuterSW"]<-"SW"
+
+shp2<-subset(shp2,ID!="OuterNW"|ID!="OuterSE"|ID!="OuterNE")
+
+
 ggplot()+
   
   xlab("Longitude")+ylab("Latitude")+
