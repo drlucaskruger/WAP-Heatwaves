@@ -180,6 +180,28 @@ dimdesc(mc1,axes=1:2)
 
 mc1$var$coord
 
+#proximity plot
+  
+write.csv(varcoord,"varcoord.csv")
+
+
+
+euclid<-read.csv("euclid.csv")
+
+euclid$imp<-1/euclid$Value
+
+ggplot(subset(euclid,KRI=="High"),aes(reorder(Distance.to,+imp),
+              imp))+geom_bar(position="identity",stat="identity")+
+  coord_flip()+
+  theme_bw()+ xlab("Variable")+ylab("Proximity")+
+  ggtitle(label="a. Proximity to high KRI")+
+
+
+ggplot(subset(euclid,KRI=="Low"),aes(reorder(Distance.to,+imp),
+                                      imp))+geom_bar(position="identity",stat="identity")+
+  coord_flip()+
+  theme_bw()+ xlab("Variable")+ylab("Proximity")+
+  ggtitle(label="b. Proximity to low KRI")
 
 
 ```
