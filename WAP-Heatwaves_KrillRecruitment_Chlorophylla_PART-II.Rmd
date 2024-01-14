@@ -45,7 +45,7 @@ library(reshape2)
 ```{r}
 
   
-krill.strata<-readRDS("KrillData.Rdata") 
+krill.strata<-readRDS("KrillData.Rdata") # data from Mauricio Mardones github
 
 
 krill.strata$timestamp<-as.POSIXct(strptime(krill.strata$datetime_set_start, format="%Y-%m-%d %H:%M:%S", tz="GMT"))
