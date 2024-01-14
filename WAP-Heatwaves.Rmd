@@ -30,9 +30,12 @@ library(doParallel) # For parallel processing
 library(raster)
 library(terra)
 library(sf)
-
+library(ncdf4)
 library(mapdata)
 library(mapproj)
+library(fields)
+library(sp)
+#library(rgdal)
 
 ```
 
@@ -70,6 +73,8 @@ wap<-shapefile("peninsula_correct.shp")
 shpdf<-data.frame(shp2)
 
 
+
+
 shp2$ID[shp2$ID=="JOIN"]<-"JI"
 shp2$ID[shp2$ID=="Extra"]<-"GS"
 shp2$ID[shp2$ID=="SSIW"]<-"SS"
@@ -78,7 +83,6 @@ shp2$ID[shp2$ID=="SSIW"]<-"SS"
 shp2$ID[shp2$ID=="OuterSW"]<-"SW"
 
 shp2<-subset(shp2,ID!="OuterNW"|ID!="OuterSE"|ID!="OuterNE")
-
 
 ggplot()+
   
@@ -139,21 +143,21 @@ OISST_sub_dl <- function(time_df){
 
 
 dl_years1 <- data.frame(date_index = 1:3,
-                        start = as.Date(c("1985-01-01","1990-01-01","1995-01-01")),
+                        start = as.character(c("1985-01-01","1990-01-01","1995-01-01")),
                         
-                        end = as.Date(c("1989-12-31","1994-12-31","1999-12-31")))
+                        end = as.character(c("1989-12-31","1994-12-31","1999-12-31")))
 
 
 dl_years2 <- data.frame(date_index = 1:3,
-                        start = as.Date(c("2000-01-01", "2005-01-01", "2010-01-01")),
+                        start = as.character(c("2000-01-01", "2005-01-01", "2010-01-01")),
                         
-                        end = as.Date(c("2004-12-31", "2009-12-31","2014-12-31")))
+                        end = as.character(c("2004-12-31", "2009-12-31","2014-12-31")))
 
 
 dl_years3 <- data.frame(date_index = 1:3,
-                        start = as.Date(c("2015-01-01","2020-01-01","2021-01-01")),
+                        start = as.character(c("2015-01-01","2020-01-01","2021-01-01")),
                         
-                        end = as.Date(c("2019-12-31","2020-12-31","2022-12-31")))
+                        end = as.character(c("2019-12-31","2020-12-31","2022-12-31")))
 
 
 ###download and save data
@@ -185,9 +189,9 @@ base::system.time(
     dplyr::select(lon, lat, t, temp,sic)
 )
 
-base::saveRDS(OISST_EL1, file = "D:/HeatWaves/Krill/Data/OISST_EL1.Rds")
-base::saveRDS(OISST_EL2, file = "D:/HeatWaves/Krill/Data/OISST_EL2.Rds")
-base::saveRDS(OISST_EL3, file = "D:/HeatWaves/Krill/Data/OISST_EL3.Rds")
+base::saveRDS(OISST_EL1, file = "OISST_EL1.Rds")
+base::saveRDS(OISST_EL2, file = "OISST_EL2.Rds")
+base::saveRDS(OISST_EL3, file = "OISST_EL3.Rds")
 
 ### summarize data per day
 
@@ -214,11 +218,11 @@ EL3<-plyr::ddply(OISST_EL3, c("t"), summarise,
 EL12<-rbind(EL1,EL2)
 EL123<-rbind(EL12,EL3)
 
-base::saveRDS(EL123, file = "D:/HeatWaves/Krill/Data/Elephant_Strata.Rds")
+base::saveRDS(EL123, file = "Elephant_Strata.Rds")
 
 #remove data and release unused memory
 
-rm(list=c("OISST_EL1","OISST_EL2","OISST_EL3","OISST_sub_dl","shp","maxmin","bbox_list",
+rm(list=c("OISST_EL1","OISST_EL2","OISST_EL3","OISST_sub_dl","shp","bbox_list",
           "EL1","EL2","EL3","EL12","EL123"))
 
 gc()
@@ -249,21 +253,21 @@ OISST_sub_dl <- function(time_df){
 
 
 dl_years1 <- data.frame(date_index = 1:3,
-                        start = as.Date(c("1985-01-01","1990-01-01","1995-01-01")),
+                        start = as.character(c("1985-01-01","1990-01-01","1995-01-01")),
                         
-                        end = as.Date(c("1989-12-31","1994-12-31","1999-12-31")))
+                        end = as.character(c("1989-12-31","1994-12-31","1999-12-31")))
 
 
 dl_years2 <- data.frame(date_index = 1:3,
-                        start = as.Date(c("2000-01-01", "2005-01-01", "2010-01-01")),
+                        start = as.character(c("2000-01-01", "2005-01-01", "2010-01-01")),
                         
-                        end = as.Date(c("2004-12-31", "2009-12-31","2014-12-31")))
+                        end = as.character(c("2004-12-31", "2009-12-31","2014-12-31")))
 
 
 dl_years3 <- data.frame(date_index = 1:3,
-                        start = as.Date(c("2015-01-01","2020-01-01","2021-01-01")),
+                        start = as.character(c("2015-01-01","2020-01-01","2021-01-01")),
                         
-                        end = as.Date(c("2019-12-31","2020-12-31","2022-12-31")))
+                        end = as.character(c("2019-12-31","2020-12-31","2022-12-31")))
 
 
 ###download and save data
@@ -295,9 +299,9 @@ base::system.time(
     dplyr::select(lon, lat, t, temp,sic)
 )
 
-base::saveRDS(OISST_SS1, file = "D:/HeatWaves/Krill/Data/OISST_SS1.Rds")
-base::saveRDS(OISST_SS2, file = "D:/HeatWaves/Krill/Data/OISST_SS2.Rds")
-base::saveRDS(OISST_SS3, file = "D:/HeatWaves/Krill/Data/OISST_SS3.Rds")
+base::saveRDS(OISST_SS1, file = "OISST_SS1.Rds")
+base::saveRDS(OISST_SS2, file = "OISST_SS2.Rds")
+base::saveRDS(OISST_SS3, file = "OISST_SS3.Rds")
 
 ### summarize data per day
 
@@ -324,7 +328,7 @@ SS3<-plyr::ddply(OISST_SS3, c("t"), summarise,
 SS12<-rbind(SS1,SS2)
 SS123<-rbind(SS12,SS3)
 
-base::saveRDS(SS123, file = "D:/HeatWaves/Krill/Data/West_SSI_Strata.Rds")
+base::saveRDS(SS123, file = "West_SSI_Strata.Rds")
 
 #remove data and release unused memory
 
@@ -362,21 +366,21 @@ OISST_sub_dl <- function(time_df){
 
 
 dl_years1 <- data.frame(date_index = 1:3,
-                        start = as.Date(c("1985-01-01","1990-01-01","1995-01-01")),
+                        start = as.character(c("1985-01-01","1990-01-01","1995-01-01")),
                         
-                        end = as.Date(c("1989-12-31","1994-12-31","1999-12-31")))
+                        end = as.character(c("1989-12-31","1994-12-31","1999-12-31")))
 
 
 dl_years2 <- data.frame(date_index = 1:3,
-                        start = as.Date(c("2000-01-01", "2005-01-01", "2010-01-01")),
+                        start = as.character(c("2000-01-01", "2005-01-01", "2010-01-01")),
                         
-                        end = as.Date(c("2004-12-31", "2009-12-31","2014-12-31")))
+                        end = as.character(c("2004-12-31", "2009-12-31","2014-12-31")))
 
 
 dl_years3 <- data.frame(date_index = 1:3,
-                        start = as.Date(c("2015-01-01","2020-01-01","2021-01-01")),
+                        start = as.character(c("2015-01-01","2020-01-01","2021-01-01")),
                         
-                        end = as.Date(c("2019-12-31","2020-12-31","2022-12-31")))
+                        end = as.character(c("2019-12-31","2020-12-31","2022-12-31")))
 
 
 ###download and save data
@@ -408,11 +412,13 @@ base::system.time(
     dplyr::select(lon, lat, t, temp,sic)
 )
 
-base::saveRDS(OISST_BS1, file = "D:/HeatWaves/Krill/Data/OISST_BS1.Rds")
-base::saveRDS(OISST_BS2, file = "D:/HeatWaves/Krill/Data/OISST_BS2.Rds")
-base::saveRDS(OISST_BS3, file = "D:/HeatWaves/Krill/Data/OISST_BS3.Rds")
+base::saveRDS(OISST_BS1, file = "OISST_BS1.Rds")
+base::saveRDS(OISST_BS2, file = "OISST_BS2.Rds")
+base::saveRDS(OISST_BS3, file = "OISST_BS3.Rds")
 
-
+OISST_BS1<-readRDS("OISST_BS1.Rds")
+OISST_BS2<-readRDS("OISST_BS2.Rds")
+OISST_BS3<-readRDS("OISST_BS3.Rds")
 ### summarize data per day
 
 BS1<-plyr::ddply(OISST_BS1, c("t"), summarise,
@@ -435,10 +441,12 @@ BS3<-plyr::ddply(OISST_BS3, c("t"), summarise,
 
 ### merge data
 
+
+
 BS12<-rbind(BS1,BS2)
 BS123<-rbind(BS12,BS3)
 
-base::saveRDS(BS123, file = "D:/HeatWaves/Krill/Data/Bransfield_Strata.Rds")
+base::saveRDS(BS123, file = "Bransfield_Strata.Rds")
 
 #remove data and release unused memory
 
@@ -478,21 +486,21 @@ OISST_sub_dl <- function(time_df){
 
 
 dl_years1 <- data.frame(date_index = 1:3,
-                        start = as.Date(c("1985-01-01","1990-01-01","1995-01-01")),
+                        start = as.character(c("1985-01-01","1990-01-01","1995-01-01")),
                         
-                        end = as.Date(c("1989-12-31","1994-12-31","1999-12-31")))
+                        end = as.character(c("1989-12-31","1994-12-31","1999-12-31")))
 
 
 dl_years2 <- data.frame(date_index = 1:3,
-                        start = as.Date(c("2000-01-01", "2005-01-01", "2010-01-01")),
+                        start = as.character(c("2000-01-01", "2005-01-01", "2010-01-01")),
                         
-                        end = as.Date(c("2004-12-31", "2009-12-31","2014-12-31")))
+                        end = as.character(c("2004-12-31", "2009-12-31","2014-12-31")))
 
 
 dl_years3 <- data.frame(date_index = 1:3,
-                        start = as.Date(c("2015-01-01","2020-01-01","2021-01-01")),
+                        start = as.character(c("2015-01-01","2020-01-01","2021-01-01")),
                         
-                        end = as.Date(c("2019-12-31","2020-12-31","2022-12-31")))
+                        end = as.character(c("2019-12-31","2020-12-31","2022-12-31")))
 
 
 ###download and save data
@@ -524,14 +532,14 @@ base::system.time(
     dplyr::select(lon, lat, t, temp,sic)
 )
 
-base::saveRDS(OISST_JI1, file = "D:/HeatWaves/Krill/Data/OISST_JI1.Rds")
-base::saveRDS(OISST_JI2, file = "D:/HeatWaves/Krill/Data/OISST_JI2.Rds")
-base::saveRDS(OISST_JI3, file = "D:/HeatWaves/Krill/Data/OISST_JI3.Rds")
+base::saveRDS(OISST_JI1, file = "OISST_JI1.Rds")
+base::saveRDS(OISST_JI2, file = "OISST_JI2.Rds")
+base::saveRDS(OISST_JI3, file = "OISST_JI3.Rds")
 
 
-OISST_JI1<-base::readRDS("D:/HeatWaves/Krill/Data/OISST_JI1.Rds")
-OISST_JI2<-base::readRDS("D:/HeatWaves/Krill/Data/OISST_JI2.Rds")
-OISST_JI3<-base::readRDS("D:/HeatWaves/Krill/Data/OISST_JI3.Rds")
+#OISST_JI1<-base::readRDS("OISST_JI1.Rds")
+#OISST_JI2<-base::readRDS("OISST_JI2.Rds")
+#OISST_JI3<-base::readRDS("OISST_JI3.Rds")
 
 
 ### summarize data per day
@@ -559,7 +567,7 @@ JI3<-plyr::ddply(OISST_JI3, c("t"), summarise,
 JI12<-rbind(JI1,JI2)
 JI123<-rbind(JI12,JI3)
 
-base::saveRDS(JI123, file = "D:/HeatWaves/Krill/Data/Joinvile_Strata.Rds")
+base::saveRDS(JI123, file = "Joinvile_Strata.Rds")
 
 #remove data and release unused memory
 
@@ -573,7 +581,7 @@ gc()
 ```
 
 
-#download and process data for Extra Strata (Gerlache?)
+#download and process data for Extra Strata (Gerlache)
 
 ```{r, echo=FALSE}
 
@@ -596,21 +604,21 @@ OISST_sub_dl <- function(time_df){
 
 
 dl_years1 <- data.frame(date_index = 1:3,
-                        start = as.Date(c("1985-01-01","1990-01-01","1995-01-01")),
+                        start = as.character(c("1985-01-01","1990-01-01","1995-01-01")),
                         
-                        end = as.Date(c("1989-12-31","1994-12-31","1999-12-31")))
+                        end = as.character(c("1989-12-31","1994-12-31","1999-12-31")))
 
 
 dl_years2 <- data.frame(date_index = 1:3,
-                        start = as.Date(c("2000-01-01", "2005-01-01", "2010-01-01")),
+                        start = as.character(c("2000-01-01", "2005-01-01", "2010-01-01")),
                         
-                        end = as.Date(c("2004-12-31", "2009-12-31","2014-12-31")))
+                        end = as.character(c("2004-12-31", "2009-12-31","2014-12-31")))
 
 
 dl_years3 <- data.frame(date_index = 1:3,
-                        start = as.Date(c("2015-01-01","2020-01-01","2021-01-01")),
+                        start = as.character(c("2015-01-01","2020-01-01","2021-01-01")),
                         
-                        end = as.Date(c("2019-12-31","2020-12-31","2022-12-31")))
+                        end = as.character(c("2019-12-31","2020-12-31","2022-12-31")))
 
 
 ###download and save data
@@ -642,9 +650,9 @@ base::system.time(
     dplyr::select(lon, lat, t, temp,sic)
 )
 
-base::saveRDS(OISST_EX1, file = "D:/HeatWaves/Krill/Data/OISST_EX1.Rds")
-base::saveRDS(OISST_EX2, file = "D:/HeatWaves/Krill/Data/OISST_EX2.Rds")
-base::saveRDS(OISST_EX3, file = "D:/HeatWaves/Krill/Data/OISST_EX3.Rds")
+base::saveRDS(OISST_EX1, file = "OISST_EX1.Rds")
+base::saveRDS(OISST_EX2, file = "OISST_EX2.Rds")
+base::saveRDS(OISST_EX3, file = "OISST_EX3.Rds")
 
 ### summarize data per day
 
@@ -671,7 +679,7 @@ EX3<-plyr::ddply(OISST_EX3, c("t"), summarise,
 EX12<-rbind(EX1,EX2)
 EX123<-rbind(EX12,EX3)
 
-base::saveRDS(EX123, file = "D:/HeatWaves/Krill/Data/Extra_Strata.Rds")
+base::saveRDS(EX123, file = "Extra_Strata.Rds")
 
 #remove data and release unused memory
 
@@ -685,7 +693,7 @@ gc()
 ```
 
 
-#download and process data for Outer SW Strata (Gerlache?)
+#download and process data for Outer SW Strata (Grandidier Channel, Margueritte Bay)
 
 ```{r, echo=FALSE}
 
@@ -708,21 +716,21 @@ OISST_sub_dl <- function(time_df){
 
 
 dl_years1 <- data.frame(date_index = 1:3,
-                        start = as.Date(c("1985-01-01","1990-01-01","1995-01-01")),
+                        start = as.character(c("1985-01-01","1990-01-01","1995-01-01")),
                         
-                        end = as.Date(c("1989-12-31","1994-12-31","1999-12-31")))
+                        end = as.character(c("1989-12-31","1994-12-31","1999-12-31")))
 
 
 dl_years2 <- data.frame(date_index = 1:3,
-                        start = as.Date(c("2000-01-01", "2005-01-01", "2010-01-01")),
+                        start = as.character(c("2000-01-01", "2005-01-01", "2010-01-01")),
                         
-                        end = as.Date(c("2004-12-31", "2009-12-31","2014-12-31")))
+                        end = as.character(c("2004-12-31", "2009-12-31","2014-12-31")))
 
 
 dl_years3 <- data.frame(date_index = 1:3,
-                        start = as.Date(c("2015-01-01","2020-01-01","2021-01-01")),
+                        start = as.character(c("2015-01-01","2020-01-01","2021-01-01")),
                         
-                        end = as.Date(c("2019-12-31","2020-12-31","2022-12-31")))
+                        end = as.character(c("2019-12-31","2020-12-31","2022-12-31")))
 
 
 ###download and save data
@@ -754,9 +762,9 @@ base::system.time(
     dplyr::select(lon, lat, t, temp,sic)
 )
 
-base::saveRDS(OISST_SW1, file = "D:/HeatWaves/Krill/Data/OISST_SW1.Rds")
-base::saveRDS(OISST_SW2, file = "D:/HeatWaves/Krill/Data/OISST_SW2.Rds")
-base::saveRDS(OISST_SW3, file = "D:/HeatWaves/Krill/Data/OISST_SW3.Rds")
+base::saveRDS(OISST_SW1, file = "OISST_SW1.Rds")
+base::saveRDS(OISST_SW2, file = "OISST_SW2.Rds")
+base::saveRDS(OISST_SW3, file = "OISST_SW3.Rds")
 
 ### summarize data per day
 
@@ -783,7 +791,7 @@ SW3<-plyr::ddply(OISST_SW3, c("t"), summarise,
 SW12<-rbind(SW1,SW2)
 SW123<-rbind(SW12,SW3)
 
-base::saveRDS(SW123, file = "D:/HeatWaves/Krill/Data/OuterSW_Strata.Rds")
+base::saveRDS(SW123, file = "OuterSW_Strata.Rds")
 
 #remove data and release unused memory
 
@@ -807,12 +815,12 @@ library(heatwaveR)
 
 #load and merge data
 
-BS<-base::readRDS("D:/HeatWaves/Krill/Data/Bransfield_Strata.Rds")
-EI<-base::readRDS("D:/HeatWaves/Krill/Data/Elephant_Strata.Rds")
-EX<-base::readRDS("D:/HeatWaves/Krill/Data/Extra_Strata.Rds")
-JI<-base::readRDS("D:/HeatWaves/Krill/Data/Joinvile_Strata.Rds")
-SS<-base::readRDS("D:/HeatWaves/Krill/Data/West_SSI_Strata.Rds")
-SW<-base::readRDS("D:/HeatWaves/Krill/Data/OuterSW_Strata.Rds")
+BS<-base::readRDS("Bransfield_Strata.Rds")
+EI<-base::readRDS("Elephant_Strata.Rds")
+EX<-base::readRDS("Extra_Strata.Rds")
+JI<-base::readRDS("Joinvile_Strata.Rds")
+SS<-base::readRDS("West_SSI_Strata.Rds")
+SW<-base::readRDS("OuterSW_Strata.Rds")
 
 ### calculate thresholds from climatology
 
@@ -940,8 +948,8 @@ climS$thresh_3x = climS$thresh_2x + climS$diff
 climS$thresh_4x = climS$thresh_3x + climS$diff
 
 
-saveRDS(climS,"D:/HeatWaves/Krill/Data/climatologyICE.Rds")
-saveRDS(climT,"D:/HeatWaves/Krill/Data/climatologyTEMP.Rds")
+saveRDS(climS,"climatologyICE.Rds")
+saveRDS(climT,"climatologyTEMP.Rds")
 
 
 #figure 2
@@ -1093,7 +1101,7 @@ evenS.S<-plyr::ddply(evenS, c("Year","Season","sector"), summarise,
 
 evesum<-merge(evenT.S,evenS.S,by=c("Year","Season","sector"))
 
-saveRDS(evesum,"D:/HeatWaves/Krill/Data/events_summary.Rds")
+saveRDS(evesum,"events_summary.Rds")
 
 summary(evesum)
 
