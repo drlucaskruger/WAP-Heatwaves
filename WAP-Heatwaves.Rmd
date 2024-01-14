@@ -899,6 +899,29 @@ swclimS<-data.frame(eSW.sic$climatology,sector=c("SW"))
 climT<-rbind(bsclimT,elclimT,exclimT,jiclimT,ssclimT,swclimT) # join data
 climS<-rbind(bsclimS,elclimS,exclimS,jiclimS,ssclimS,swclimS) # join data
 
+
+#climT$Day<-(decimal_date(climT$date_peak)-year(climT$date_peak))*365 # day of the year
+climT$quart<-quarter(climT$t) # tri-mensual classification
+
+#climS$Day<-(decimal_date(climS$date_peak)-year(climS$date_peak))*365 # day of the year
+climS$quart<-quarter(climS$t) # tri-mensual classification
+
+
+# change names
+climT$Season[climT$quart=="1"]<-"JFM"
+climT$Season[climT$quart=="2"]<-"AMJ"
+climT$Season[climT$quart=="3"]<-"JAS"
+climT$Season[climT$quart=="4"]<-"OND"
+
+climS$Season[climS$quart=="1"]<-"JFM"
+climS$Season[climS$quart=="2"]<-"AMJ"
+climS$Season[climS$quart=="3"]<-"JAS"
+climS$Season[climS$quart=="4"]<-"OND"
+
+
+
+
+
 # plots for temperature and sea ice
 
 # Create category breaks and select slice of data.frame
@@ -948,11 +971,15 @@ climS$thresh_3x = climS$thresh_2x + climS$diff
 climS$thresh_4x = climS$thresh_3x + climS$diff
 
 
+
+
+
+
 saveRDS(climS,"climatologyICE.Rds")
 saveRDS(climT,"climatologyTEMP.Rds")
 
 
-#figure 2
+#figure 
 (ggplot(data = subset(climT,t>'2022-03-31'), aes(x = t, y = tMax)) +
   geom_flame(aes(y2 = thresh, fill = "Moderate")) +
   geom_flame(aes(y2 = thresh_2x, fill = "Strong")) +
@@ -1037,7 +1064,7 @@ evenT$Season<-factor(evenT$Season,levels=c("JFM","AMJ","JAS","OND")) # order lev
 
 evenS$Season<-factor(evenS$Season,levels=c("JFM","AMJ","JAS","OND")) # order levels
 
-#PLOT figure 3
+#PLOT figure 2
 
 
 
