@@ -45,7 +45,7 @@ library(reshape2)
 ```{r}
 
   
-krill.strata<-readRDS("KrillData.Rdata") # data from Mauricio Mardones github
+krill.strata<-readRDS("KrillData.Rdata") 
 
 
 krill.strata$timestamp<-as.POSIXct(strptime(krill.strata$datetime_set_start, format="%Y-%m-%d %H:%M:%S", tz="GMT"))
@@ -150,69 +150,35 @@ chlk$tempc<-ifelse(chlk$TempMean<median(na.omit(chlk$TempMean)),"Low","High")
 
 chlk$SN[is.na(chlk$SN)]<-0
 
-chlk$siceve[chlk$SN=="0"]<-"None"
-chlk$siceve[chlk$SN=="1" |chlk$SN=="2"]<-"One or Two"
-chlk$siceve[is.na(chlk$siceve)]<-"Three or more"
 
 
 chlk$TN[is.na(chlk$TN)]<-0
 
-chlk$tempeve[chlk$TN=="0"]<-"None"
-chlk$tempeve[chlk$TN=="1" |chlk$SN=="2"]<-"One or Two"
-chlk$tempeve[is.na(chlk$tempeve)]<-"Three or more"
+chlk$mhws<-chlk$TN+chlk$SN
+chlk$MHW<-ifelse(chlk$mhws>0,"with events","without events")
 
-chlk$TcumDur[is.na(chlk$TcumDur)]<-0
-chlk$ScumDur[is.na(chlk$ScumDur)]<-0
+median(chlk$recind)
+kdf<-data.frame(CHL=chlk$chlc,SIC=chlk$sicc,SST=chlk$tempc,MHW=chlk$MHW,
+                KRI=ifelse(chlk$recind<0.16,"Low KRI","High KRI"))
 
-chlk$TmeanInt[is.na(chlk$TmeanInt)]<-0
-chlk$SmeanInt[is.na(chlk$SmeanInt)]<-0
-
-
-# ----- permutation analysis with the pgirmess package----------
-
-
-lm01<-lm(recind~sicc,data=chlk)
-summary(lm01)
-pgirmess::PermTest(lm01,B=1000)
-
-lm02<-lm(recind~siceve,data=chlk)
-summary(lm02)
-pgirmess::PermTest(lm02,B=1000)
-
-lm03<-lm(recind~tempc,data=chlk)
-summary(lm03)
-pgirmess::PermTest(lm03,B=1000)
-
-
-lm04<-lm(recind~tempeve,data=chlk)
-summary(lm04)
-pgirmess::PermTest(lm04,B=1000)
-
-
-lm05<-lm(recind~chlc,data=chlk)
-summary(lm05)
-pgirmess::PermTest(lm05,B=1000)
+                
+library(FactoMineR)                
 
 
 
-#-----plot---------
+mc1<-MCA(kdf, ncp = 2, ind.sup = NULL, quanti.sup =NULL,
+         quali.sup = NULL, excl=NULL, graph = TRUE,
+         level.ventil = 0.5, axes = c(1,2), row.w = NULL,
+         method="Burt", na.method="NA", tab.disj=NULL)
 
-ggplot(chlk,aes(sicc,recind))+geom_boxplot(fill="grey70")+
-theme_bw()+xlab("")+ylab("KRI")+
-  ggtitle(label="a. Winter sea ice cover")+
+plot(mc1,invisible=c("ind","quali.sup"),hab="quali")
+plot(mc1,invisible=c("var","quali.sup"),cex=.5,label="none")
+plot(mc1,hab="quali")
 
-ggplot(chlk,aes(tempc,recind))+geom_boxplot(fill="grey70")+
-  theme_bw()+xlab("")+ylab("")+
-  ggtitle(label="b. Summer sea surface temperature")+
+dimdesc(mc1,axes=1:2)
 
-ggplot(chlk,aes(tempeve,recind))+geom_boxplot(fill="grey70")+
-  theme_bw()+xlab("")+ylab("KRI")+
-  ggtitle(label="c. Occurrence of extreme events")+
 
-ggplot(chlk,aes(chlc,recind))+geom_boxplot(fill="grey70")+
-  theme_bw()+xlab("")+ylab("")+
-  ggtitle(label="d. Chlorophyll-a concentration")
-
+mc1$var$coord
 
 
 
