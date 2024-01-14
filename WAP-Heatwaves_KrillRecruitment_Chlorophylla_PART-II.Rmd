@@ -40,441 +40,16 @@ library(reshape2)
 
 ###----------- calculating marine heatwaves-------------
 
-
-```{r,echo=FALSE}
-
-library(heatwaveR)
-
-
-#load and merge data
-
-BS<-base::readRDS("D:/HeatWaves/Krill/Data/Bransfield_Strata.Rds")
-EI<-base::readRDS("D:/HeatWaves/Krill/Data/Elephant_Strata.Rds")
-EX<-base::readRDS("D:/HeatWaves/Krill/Data/Extra_Strata.Rds")
-JI<-base::readRDS("D:/HeatWaves/Krill/Data/Joinvile_Strata.Rds")
-SS<-base::readRDS("D:/HeatWaves/Krill/Data/West_SSI_Strata.Rds")
-SW<-base::readRDS("D:/HeatWaves/Krill/Data/OuterSW_Strata.Rds")
-
-### calculate thresholds from climatology
-
-# tMax thresholds
-tMax_clim.BS <- ts2clm(data = BS, 
-                     y = tMax, climatologyPeriod = c("1985-01-01", "2022-12-31"), pctile = 90)
-
-tMax_clim.EI <- ts2clm(data = EI, 
-                     y = tMax, climatologyPeriod = c("1986-01-01", "2022-12-31"), pctile = 90)
-
-tMax_clim.EX <- ts2clm(data = EX, 
-                     y = tMax, climatologyPeriod = c("1985-01-01", "2022-12-31"), pctile = 90)
-
-tMax_clim.JI <- ts2clm(data = JI, 
-                     y = tMax, climatologyPeriod = c("1985-01-01", "2022-12-31"), pctile = 90)
-
-tMax_clim.SS <- ts2clm(data = SS, 
-                     y = tMax, climatologyPeriod = c("1985-01-01", "2022-12-31"), pctile = 90)
-
-tMax_clim.SW <- ts2clm(data = SW, 
-                     y = tMax, climatologyPeriod = c("1985-01-01", "2022-12-31"), pctile = 90)
-
-
-
-# SIC thresholds
-
-sicMean_clim.BS <- ts2clm(data = BS, 
-                     y = sicMean, climatologyPeriod = c("1985-01-01", "2022-12-31"), pctile = 20)
-sicMean_clim.EI <- ts2clm(data = EI, 
-                     y = sicMean, climatologyPeriod = c("1986-01-01", "2022-12-31"), pctile = 20)
-sicMean_clim.EX <- ts2clm(data = EX, 
-                     y = sicMean, climatologyPeriod = c("1985-01-01", "2022-12-31"), pctile = 20)
-
-sicMean_clim.JI <- ts2clm(data = JI, 
-                     y = sicMean, climatologyPeriod = c("1985-01-01", "2022-12-31"), pctile = 20)
-sicMean_clim.SS <- ts2clm(data = SS, 
-                     y = sicMean, climatologyPeriod = c("1985-01-01", "2022-12-31"), pctile = 20)
-sicMean_clim.SW <- ts2clm(data = SW, 
-                     y = sicMean, climatologyPeriod = c("1985-01-01", "2022-12-31"), pctile = 20)
-
-
-
-
-
-
-#DETECT alldfS
-eBS.t <- detect_event(data = tMax_clim.BS, y = tMax,minDuration = 5,maxGap = 7) 
-eEI.t <- detect_event(data = tMax_clim.EI, y = tMax,minDuration = 5,maxGap = 7) 
-eEX.t <- detect_event(data = tMax_clim.EX, y = tMax,minDuration = 5,maxGap = 7) 
-eJI.t <- detect_event(data = tMax_clim.JI, y = tMax,minDuration = 5,maxGap = 7) 
-eSS.t <- detect_event(data = tMax_clim.SS, y = tMax,minDuration = 5,maxGap = 7) 
-eSW.t <- detect_event(data = tMax_clim.SW, y = tMax,minDuration = 5,maxGap = 7) 
-
-
-eBS.sic <- detect_event(data = sicMean_clim.BS, y = sicMean,minDuration = 3,maxGap = 7,coldSpells = T) 
-eEI.sic <- detect_event(data = sicMean_clim.EI, y = sicMean,minDuration = 3,maxGap = 7,coldSpells = T) 
-eEX.sic <- detect_event(data = sicMean_clim.EX, y = sicMean,minDuration = 3,maxGap = 7,coldSpells = T) 
-eJI.sic <- detect_event(data = sicMean_clim.JI, y = sicMean,minDuration = 3,maxGap = 7,coldSpells = T) 
-eSS.sic <- detect_event(data = sicMean_clim.SS, y = sicMean,minDuration = 3,maxGap = 7,coldSpells = T) 
-eSW.sic <- detect_event(data = sicMean_clim.SW, y = sicMean,minDuration = 3,maxGap = 7,coldSpells = T) 
-
-
-#export climatologies and create dataframes
-
-bsclimT<-data.frame(eBS.t$climatology,sector=c("BS")) 
-elclimT<-data.frame(eEI.t$climatology,sector=c("EI")) 
-exclimT<-data.frame(eEX.t$climatology,sector=c("EX")) 
-jiclimT<-data.frame(eJI.t$climatology,sector=c("JI")) 
-ssclimT<-data.frame(eSS.t$climatology,sector=c("SS")) 
-swclimT<-data.frame(eSW.t$climatology,sector=c("SW")) 
-
-bsclimS<-data.frame(eBS.sic$climatology,sector=c("BS")) 
-elclimS<-data.frame(eEI.sic$climatology,sector=c("EI")) 
-exclimS<-data.frame(eEX.sic$climatology,sector=c("EX")) 
-jiclimS<-data.frame(eJI.sic$climatology,sector=c("JI")) 
-ssclimS<-data.frame(eSS.sic$climatology,sector=c("SS")) 
-swclimS<-data.frame(eSW.sic$climatology,sector=c("SW")) 
-
-climT<-rbind(bsclimT,elclimT,exclimT,jiclimT,ssclimT,swclimT) # join data
-climS<-rbind(bsclimS,elclimS,exclimS,jiclimS,ssclimS,swclimS) # join data
-
-# plots for temperature and sea ice
-
-# Create category breaks and select slice of data.frame
-
-
-# Set line colours
-lineColCat <- c(
-  "Temperature" = "black",
-  "Climatology" = "gray20",
-  "Threshold" = "darkgreen",
-  "2x Threshold" = "darkgreen",
-  "3x Threshold" = "darkgreen",
-  "4x Threshold" = "darkgreen"
-  )
-
-# Set category fill colours
-fillColCat <- c(
-  "Moderate" = "#ffc866",
-  "Strong" = "#ff6900",
-  "Severe" = "#9e0000",
-  "Extreme" = "#2d0000"
-  )
-
-# Set category fill colours
-fillColCat2 <- c(
-  "Moderate" = "#ffc866",
-  "Normal" = "#85B7CC"
-  )
-
-lineColCat2 <- c(
-  "Sea Ice" = "black",
-  "Climatology" = "blue3",
-  "Threshold" = "red3"
-  )
-# Create category breaks 
-
-climT$diff = climT$thresh - climT$seas
-climT$thresh_2x = climT$thresh + climT$diff
-climT$thresh_3x = climT$thresh_2x + climT$diff
-climT$thresh_4x = climT$thresh_3x + climT$diff
-
-
-
-climS$diff = climS$thresh - climS$seas
-climS$thresh_2x = climS$thresh + climS$diff
-climS$thresh_3x = climS$thresh_2x + climS$diff
-climS$thresh_4x = climS$thresh_3x + climS$diff
-
-
-saveRDS(climS,"D:/HeatWaves/Krill/Data/climatologyICE.Rds")
-saveRDS(climT,"D:/HeatWaves/Krill/Data/climatologyTEMP.Rds")
-
-
-#figure 2
-(ggplot(data = subset(climT,t>'2022-03-31'), aes(x = t, y = tMax)) +
-  geom_flame(aes(y2 = thresh, fill = "Moderate")) +
-  geom_flame(aes(y2 = thresh_2x, fill = "Strong")) +
-  geom_flame(aes(y2 = thresh_3x, fill = "Severe")) +
-  geom_flame(aes(y2 = thresh_4x, fill = "Extreme")) +
-  geom_line(aes(y = thresh_2x, col = "2x Threshold"), size = 0.7, linetype = "dashed") +
-  geom_line(aes(y = thresh_3x, col = "3x Threshold"), size = 0.7, linetype = "dotdash") +
-  geom_line(aes(y = thresh_4x, col = "4x Threshold"), size = 0.7, linetype = "dotted") +
-  geom_line(aes(y = seas, col = "Climatology"), size = 0.7) +
-  geom_line(aes(y = thresh, col = "Threshold"), size = 0.7) +
-  geom_line(aes(y = tMax, col = "Temperature"), size = 0.6) +
-  scale_colour_manual(name = NULL, values = lineColCat,
-                      breaks = c("Temperature", "Climatology", "Threshold",
-                                 "2x Threshold", "3x Threshold", "4x Threshold")) +
-  scale_fill_manual(name = NULL, values = fillColCat, guide = FALSE) +
-  scale_x_date(date_labels = "%b %Y") +
-  guides(colour = guide_legend(override.aes = list(linetype = c("solid", "solid", "solid",
-                                                                "dashed", "dotdash", "dotted"),
-                                                   size = c(0.6, 0.7, 0.7, 0.7, 0.7, 0.7)))) +
-  labs(y = "Temperature [°C]", x = NULL)+
-  facet_wrap(sector~.)+theme_bw()+theme(panel.spacing.x = unit(2, "lines"))+
-  ggtitle(label="a. High temperature extremes"))/
-  
-  
-  
-  
-  (ggplot(data = subset(climS,t>'2022-03-31'), aes(x = t, y = sicMean)) +
-     geom_flame(aes(y = sicMean,y2=thresh, fill = "Normal")) +
-     geom_flame(aes(y = thresh,y2=sicMean, fill = "Moderate")) +
-     geom_line(aes(y = seas, col = "Climatology"), size = 0.7,linetype="dashed") +
-     geom_line(aes(y = thresh, col = "Threshold"), size = 0.7,linetype="dotdash") +
-     geom_line(aes(y = sicMean, col = "Sea Ice"), size = 0.6) +
-     scale_colour_manual(name = NULL, values = lineColCat2,
-                         breaks = c("Sea Ice", "Climatology","Threshold")) +
-     scale_fill_manual(name = NULL, values = fillColCat2, guide = FALSE) +
-     scale_x_date(date_labels = "%b %Y") +
-     guides(colour = guide_legend(override.aes = list(linetype = c("solid","dashed",
-                                                                   "dotdash")))) +
-     labs(y = "Sea ice cover [fraction]", x = NULL)+
-     facet_wrap(sector~.)+theme_bw()+theme(panel.spacing.x = unit(2, "lines"))+
-     
-     ggtitle(label="b. Low sea ice extremes"))
-
-#export events and creat data frame
-
-bsevenT<-data.frame(eBS.t$event,sector=c("BS")) 
-elevenT<-data.frame(eEI.t$event,sector=c("EI")) 
-exevenT<-data.frame(eEX.t$event,sector=c("EX")) 
-jievenT<-data.frame(eJI.t$event,sector=c("JI")) 
-ssevenT<-data.frame(eSS.t$event,sector=c("SS")) 
-swevenT<-data.frame(eSW.t$event,sector=c("SW")) 
-
-bsevenS<-data.frame(eBS.sic$event,sector=c("BS")) 
-elevenS<-data.frame(eEI.sic$event,sector=c("EI")) 
-exevenS<-data.frame(eEX.sic$event,sector=c("EX")) 
-jievenS<-data.frame(eJI.sic$event,sector=c("JI")) 
-ssevenS<-data.frame(eSS.sic$event,sector=c("SS")) 
-swevenS<-data.frame(eSW.sic$event,sector=c("SW")) 
-
-evenT<-rbind(bsevenT,elevenT,exevenT,jievenT,ssevenT,swevenT) # join events data
-evenS<-rbind(bsevenS,elevenS,exevenS,jievenS,ssevenS,swevenS) # join events data
-
-evenT$Day<-(decimal_date(evenT$date_peak)-year(evenT$date_peak))*365 # day of the year
-evenT$quart<-quarter(evenT$date_peak) # tri-mensual classification
-
-evenS$Day<-(decimal_date(evenS$date_peak)-year(evenS$date_peak))*365 # day of the year
-evenS$quart<-quarter(evenS$date_peak) # tri-mensual classification
-
-
-# change names
-evenT$Season[evenT$quart=="1"]<-"JFM"
-evenT$Season[evenT$quart=="2"]<-"AMJ"
-evenT$Season[evenT$quart=="3"]<-"JAS"
-evenT$Season[evenT$quart=="4"]<-"OND"
-
-evenS$Season[evenS$quart=="1"]<-"JFM"
-evenS$Season[evenS$quart=="2"]<-"AMJ"
-evenS$Season[evenS$quart=="3"]<-"JAS"
-evenS$Season[evenS$quart=="4"]<-"OND"
-
-evenT$Season<-factor(evenT$Season,levels=c("JFM","AMJ","JAS","OND")) # order levels
-
-evenS$Season<-factor(evenS$Season,levels=c("JFM","AMJ","JAS","OND")) # order levels
-
-#PLOT figure 3
-
-
-
-(ggplot(subset(evenT,date_peak>'2009-12-31'),aes(date_peak,duration,colour=Season,linetype=Season))+
-    geom_lolli()+
-    theme_bw()+ylab("Duration (days)")+
-    scale_colour_manual(values=c("red","green4","blue","orange"))+
-    facet_wrap(sector~.)+
-    xlab("Date peak")+
-    ggtitle(label="a. Duration of high temperature events"))+
-  
-  (ggplot(subset(evenT,date_peak>'2009-12-31'),aes(date_peak,intensity_max,colour=Season,linetype=Season))+
-     geom_lolli()+
-     theme_bw()+ylab("Intensity (°C)")+
-     scale_colour_manual(values=c("red","green4","blue","orange"))+
-     facet_wrap(sector~.)+
-     xlab("Date peak")+
-     ggtitle(label="b. Intensity of temperature events"))+
-  
-  (ggplot(subset(evenS,date_peak>'2009-12-31'),aes(date_peak,duration,colour=Season,linetype=Season))+
-     geom_lolli()+
-     theme_bw()+ylab("Duration (days)")+
-     scale_colour_manual(values=c("red","green4","blue","orange"))+
-     facet_wrap(sector~.)+
-     xlab("Date peak")+
-     ggtitle(label="c. Duration of low sea ice events"))+
-
-
-  (ggplot(subset(evenS,date_peak>'2009-12-31'),aes(date_peak,intensity_max,colour=Season,linetype=Season))+
-     geom_lolli()+
-     theme_bw()+ylab("Intensity")+
-     scale_colour_manual(values=c("red","green4","blue","orange"))+
-     facet_wrap(sector~.)+
-     xlab("Date peak")+
-     ggtitle(label="d. Intensity of low sea ice events"))
-
-
-
-head(evenT)
-evenT$Year<-year(evenT$date_start)
-evenS$Year<-year(evenS$date_start)
-
-
-#summarize per season and year
-
-evenT.S<-plyr::ddply(evenT, c("Year","Season","sector"), summarise,
-            TN=length(duration),
-            TmeanDur=mean(duration),
-            TcumDur=sum(duration),
-            TmeanInt=mean(intensity_mean),
-            TmaxInt=max(intensity_max))
-
-evenS.S<-plyr::ddply(evenS, c("Year","Season","sector"), summarise,
-            SN=length(duration),
-            SmeanDur=mean(duration),
-            ScumDur=sum(duration),
-            SmeanInt=mean(intensity_mean),
-            SmaxInt=max(intensity_max))
-
-
-evesum<-merge(evenT.S,evenS.S,by=c("Year","Season","sector"))
-
-saveRDS(evesum,"D:/HeatWaves/Krill/Data/events_summary.Rds")
-
-
-evesum$TN[is.na(evesum$TN)]<-0
-evesum$TmeanDur[is.na(evesum$TmeanDur)]<-0
-evesum$TcumDur[is.na(evesum$TcumDur)]<-0
-evesum$TmeanInt[is.na(evesum$TmeanInt)]<-0
-evesum$TmaxInt[is.na(evesum$TmaxInt)]<-0
-
-evesum$SN[is.na(evesum$SN)]<-0
-evesum$SmeanDur[is.na(evesum$SmeanDur)]<-0
-evesum$ScumDur[is.na(evesum$ScumDur)]<-0
-evesum$SmeanInt[is.na(evesum$SmeanInt)]<-0
-evesum$SmaxInt[is.na(evesum$SmaxInt)]<-0
-
-
-BS$sector<-c("BS")
-EI$sector<-c("EI")
-EX$sector<-c("EX")
-JI$sector<-c("JI")
-SS$sector<-c("SS")
-SW$sector<-c("SW")
-
-
-alldf<-rbind(BS,EI,EX,JI,SS,SW)
-
-alldf$month<-month(alldf$t)
-alldf$Year<-year(alldf$t)
-alldf$quarter<-quarter(alldf$t)
-
-alldf$Season[alldf$quart=="1"]<-"JFM"
-alldf$Season[alldf$quart=="2"]<-"AMJ"
-alldf$Season[alldf$quart=="3"]<-"JAS"
-alldf$Season[alldf$quart=="4"]<-"OND"
-
-
-adfm<-plyr::ddply(alldf, c("Year","Season","sector"), summarise,
-            tMax=mean(tMax),
-            sicMin=mean(sicMin))
-
-
-
-
-```
-
-### krill length data from fishing
-
-```{r}
-
-### reprocessing climate data 
-### we know sea ice might be important during winter, and temperature influences summer productivity
-
-# first, lets re-evaluate events date based on the peak date
-
-evenT$Month<-month(evenT$date_peak)
-evenS$Month<-month(evenS$date_peak)
-
-evenT$Year<-year(evenT$date_peak)
-evenT$quart<-quarter(evenT$date_peak) # tri-mensual classification
-
-evenS$Year<-year(evenS$date_peak)
-evenS$quart<-quarter(evenS$date_peak) # tri-mensual classification
-
-
-# change names
-evenT$Season[evenT$quart=="1"]<-"JFM"
-evenT$Season[evenT$quart=="2"]<-"AMJ"
-evenT$Season[evenT$quart=="3"]<-"JAS"
-evenT$Season[evenT$quart=="4"]<-"OND"
-
-evenS$Season[evenS$quart=="1"]<-"JFM"
-evenS$Season[evenS$quart=="2"]<-"AMJ"
-evenS$Season[evenS$quart=="3"]<-"JAS"
-evenS$Season[evenS$quart=="4"]<-"OND"
-
-
-
-WseaIce<-plyr::ddply(subset(evenS,Season=="AMJ"|Season=="JAS"), c("Year","sector"), summarise,
-                     SN=length(duration),
-                     SmeanDur=mean(duration),
-                     ScumDur=sum(duration),
-                     SmeanInt=mean(intensity_mean),
-                     SmaxInt=max(intensity_max))
-
-Stemp<-plyr::ddply(subset(evenT,Season=="JFM"|Season=="OND"), c("Year","sector"), summarise,
-                     TN=length(duration),
-                     TmeanDur=mean(duration),
-                     TcumDur=sum(duration),
-                     TmeanInt=mean(intensity_mean),
-                     TmaxInt=max(intensity_max))
-
-
-
-
-evesum<-merge(WseaIce,Stemp,by=c("Year","sector"),all=T)
-
-
-# load climatology data 
-
-climS<-readRDS("D:/HeatWaves/Krill/Data/climatologyICE.Rds")
-climT<-readRDS("D:/HeatWaves/Krill/Data/climatologyTEMP.Rds")
-
-clim<-merge(climT,climS,by=c("t","sector"))
-
-
-clim$Year<-year(clim$t)
-  clim$Month<-month(clim$t)
-  clim$Week<-week(clim$t)
-  
-  clim$Quarter<-quarter(clim$t)
-  
-  clim$Season[clim$Quarter=="1"]<-"JFM"
-  clim$Season[clim$Quarter=="2"]<-"AMJ"
-  clim$Season[clim$Quarter=="3"]<-"JAS"
-  clim$Season[clim$Quarter=="4"]<-"OND"
-  
-  head(clim)
- 
-  climWS<-plyr::ddply(subset(clim,Season=="AMJ"|Season=="JAS"), c("Year","sector"), summarise,
-                    SICPeak=max(sicMean),SICmean=mean(sicMean),thresh.y=mean(thresh.y),
-                    Wtemp=max(tMax))
-
-climST<-plyr::ddply(subset(clim,Season=="JFM"|Season=="OND"), c("Year","sector"), summarise,
-                   
-                    TempMax=max(tMax),TempMean=mean(tMax),thresh.x=mean(thresh.x))
-climWS<-merge(climWS,climST)
-
-
-```
-
 ### load and process krill data
 
 ```{r}
 
   
-krill.strata<-readRDS("KrillData (2).Rdata") 
+krill.strata<-readRDS("KrillData.Rdata") 
 
 
 krill.strata$timestamp<-as.POSIXct(strptime(krill.strata$datetime_set_start, format="%Y-%m-%d %H:%M:%S", tz="GMT"))
+
 krill.strata$Week<-week(krill.strata$timestamp)
 krill.strata$Year<-year(krill.strata$timestamp)
 krill.strata$Month<-month(krill.strata$timestamp)
@@ -517,13 +92,22 @@ recind$recind<-recind$Nrec/recind$Ntot  # recruitment index
 summary(recind$Year)
 
 
+ggplot(recind,aes(Year,recind))+
+  geom_smooth(se=F,method="gam")+
+  geom_point()+
+  #facet_wrap(sector~.)+
+  theme_bw()+ylab("Proportion of recruiting individuals")+xlim(2000,2015)
+
 ```
 
 
 
 ```{r}
 
-chlall<-base::readRDS("D:/HeatWaves/Krill/Data/CHL_summer.Rds")
+chlall<-base::readRDS("CHL_summer.Rds")
+
+climS<-base::readRDS("climatologyICE.Rds")
+climT<-base::readRDS("climatologyTEMP.Rds")
 
 summary((year(climS$t)))
 
@@ -548,6 +132,8 @@ climWS<-merge(climWS,climST)
 
 head(climWS)
 
+evesum<-base::readRDS("events_summary.Rds")
+
 eveclim<-merge(evesum,climWS,all=T)
 
 mean(chlall$chlm)
@@ -555,8 +141,6 @@ mean(chlall$chlm)
 ecc<-merge(eveclim,chlall,all=T)
 
 chlk<-merge(ecc,recind)
-
-
 
 
 head(chlk)
@@ -577,99 +161,57 @@ chlk$tempeve[chlk$TN=="0"]<-"None"
 chlk$tempeve[chlk$TN=="1" |chlk$SN=="2"]<-"One or Two"
 chlk$tempeve[is.na(chlk$tempeve)]<-"Three or more"
 
+chlk$TcumDur[is.na(chlk$TcumDur)]<-0
+chlk$ScumDur[is.na(chlk$ScumDur)]<-0
 
-chlk
-
-
-
-
-ggplot(chlk,aes(SICmean,recind))+
-  stat_smooth(method="glm", method.args = list(family = "binomial"))+
-  geom_point()+theme_bw()+xlab("Winter sea ice cover")+ylab("Recruitment index")+
-
-ggplot(chlk,aes(SN,recind))+
-  stat_smooth(method="glm", method.args = list(family = "binomial"))+
-  geom_point()+theme_bw()+xlab("Number of low winter sea ice events")+ylab("Recruitment index")+
-
-  ggplot(chlk,aes(TempMean,recind))+
-  stat_smooth(method="glm", method.args = list(family = "binomial"))+
-  geom_point()+theme_bw()+xlab("Summer mean temperature")+ylab("Recruitment index")+
-  
-  ggplot(chlk,aes(TN,recind))+
-  stat_smooth(method="glm", method.args = list(family = "binomial"))+
-  geom_point()+theme_bw()+xlab("WNumber of high summer temperature events")+ylab("Recruitment index")+
-
-ggplot(chlk,aes(chlm,recind))+
-  stat_smooth(method="glm", method.args = list(family = "binomial"))+
-  geom_point()+theme_bw()+xlab("Summer chlorophyll-a concentration")+ylab("Recruitment index")+
-
-ggplot(chlk,aes(SICmean,chlm))+
-  stat_smooth(method="glm", method.args = list(family = "binomial"))+
-  geom_point()+theme_bw()+xlab("Winter sea ice cover")+ylab("Summer chlorophyll-a concentration")+
+chlk$TmeanInt[is.na(chlk$TmeanInt)]<-0
+chlk$SmeanInt[is.na(chlk$SmeanInt)]<-0
 
 
-ggplot(chlk,aes(TempMean,chlm))+
-  stat_smooth(method="glm", method.args = list(family = "binomial"))+
-  geom_point()+theme_bw()+xlab("Summer temperature")+ylab("Summer chlorophyll-a concentration")+
-  
-  ggplot(chlk,aes(SN,chlm))+
-  stat_smooth(method="glm", method.args = list(family = "binomial"))+
-  geom_point()+theme_bw()+xlab("Low winter sea ice events")+ylab("Summer chlorophyll-a concentration")+
-  
-  
-  ggplot(chlk,aes(TN,chlm))+
-  stat_smooth(method="glm", method.args = list(family = "binomial"))+
-  geom_point()+theme_bw()+xlab("High summer temperature events")+ylab("Summer chlorophyll-a concentration")
-  
-  
+# ----- permutation analysis with the pgirmess package----------
 
-lmp01<-lmPerm::lmp(recind~SICmean,data=chlk,perm="Prob",center=T,singular.ok = F)
 
-summary(lmp01)
+lm01<-lm(recind~sicc,data=chlk)
+summary(lm01)
+pgirmess::PermTest(lm01,B=1000)
 
-anova(lmp01)
+lm02<-lm(recind~siceve,data=chlk)
+summary(lm02)
+pgirmess::PermTest(lm02,B=1000)
+
+lm03<-lm(recind~tempc,data=chlk)
+summary(lm03)
+pgirmess::PermTest(lm03,B=1000)
+
+
+lm04<-lm(recind~tempeve,data=chlk)
+summary(lm04)
+pgirmess::PermTest(lm04,B=1000)
+
+
+lm05<-lm(recind~chlc,data=chlk)
+summary(lm05)
+pgirmess::PermTest(lm05,B=1000)
 
 
 
-lmp02<-lmPerm::lmp(recind~SN,data=chlk,perm="Prob",center=T,singular.ok = F)
+#-----plot---------
 
-summary(lmp02)
+ggplot(chlk,aes(sicc,recind))+geom_boxplot(fill="grey70")+
+theme_bw()+xlab("")+ylab("KRI")+
+  ggtitle(label="a. Winter sea ice cover")+
 
-anova(lmp02)
+ggplot(chlk,aes(tempc,recind))+geom_boxplot(fill="grey70")+
+  theme_bw()+xlab("")+ylab("")+
+  ggtitle(label="b. Summer sea surface temperature")+
 
+ggplot(chlk,aes(tempeve,recind))+geom_boxplot(fill="grey70")+
+  theme_bw()+xlab("")+ylab("KRI")+
+  ggtitle(label="c. Occurrence of extreme events")+
 
-lmp03<-lmPerm::lmp(recind~TempMean,data=chlk,perm="Prob",center=T,singular.ok = F)
-
-summary(lmp03)
-
-anova(lmp03)
-
-lmp04<-lmPerm::lmp(recind~TN,data=chlk,perm="Prob",center=T,singular.ok = F)
-
-summary(lmp04)
-
-anova(lmp04)
-
-
-lmp05<-lmPerm::lmp(recind~chlm,data=chlk,perm="Prob",center=T,singular.ok = F)
-
-summary(lmp05)
-
-anova(lmp05)
-
-
-
-ggplot(chlk,aes(SICmean,recind))+
-  stat_smooth(method="glm", method.args = list(family = "binomial"))+
-  geom_point()+theme_bw()+xlab("Proportion")+ylab("Recruitment index")+
-  ggtitle("a. Winter sea ice cover")+
-  
-  
-  ggplot(chlk,aes(chlm,recind))+
-  stat_smooth(method="glm", method.args = list(family = "binomial"))+
-  geom_point()+theme_bw()+xlab("mg/m3")+ylab("")+
-  ggtitle("b. Summer clorophyll-a concentration")
-
+ggplot(chlk,aes(chlc,recind))+geom_boxplot(fill="grey70")+
+  theme_bw()+xlab("")+ylab("")+
+  ggtitle(label="d. Chlorophyll-a concentration")
 
 
 
