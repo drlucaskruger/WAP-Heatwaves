@@ -143,25 +143,57 @@ ecc<-merge(eveclim,chlall,all=T)
 chlk<-merge(ecc,recind)
 
 
+chlk<-merge(ecc,recind)
+
 head(chlk)
+summary(chlk$SICmean)
+summary(chlk$SICmean[chlk$Year<2005])
+summary(chlk$SICmean[chlk$Year>2004])
 
-chlk$sicc<-ifelse(chlk$SICmean<median(na.omit(chlk$SICmean)),"Low","High")
-chlk$tempc<-ifelse(chlk$TempMean<median(na.omit(chlk$TempMean)),"Low","High")
 
-chlk$SN[is.na(chlk$SN)]<-0
+
+chlk$sicc[chlk$SICmean<0.47 & chlk$Year>=2005]<-"Low"
+chlk$sicc[chlk$SICmean<0.15 & chlk$Year<2005]<-"Low"
+
+chlk$sicc[is.na(chlk$sicc)]<-"High"
+
+summary(chlk$TempMean[chlk$Year<2005])
+summary(chlk$TempMean[chlk$Year>2004])
+
+
+chlk$tempc[chlk$TempMean<0.877 & chlk$Year>=2005]<-"Low"
+chlk$tempc[chlk$TempMean<0.541 & chlk$Year<2005]<-"Low"
+
+chlk$tempc[is.na(chlk$tempc)]<-"High"
+
+
+ggplot()+
+  geom_smooth(data=chlk,aes(x=Year,y=recind),
+              method="gam",se=F,colour="grey30")+xlim(2000,2015)+
+  geom_point(data=chlk,aes(x=Year,y=recind,colour=sicc,shape=sicc),size=2)+
+  scale_colour_manual(values=c("blue2","red2"))+theme_bw()
+  
+  
+
 
 
 
 chlk$TN[is.na(chlk$TN)]<-0
 
-chlk$mhws<-chlk$TN+chlk$SN
+chlk$mhws<-chlk$TN
 chlk$MHW<-ifelse(chlk$mhws>0,"with events","without events")
 
-median(chlk$recind)
-kdf<-data.frame(CHL=chlk$chlc,SIC=chlk$sicc,SST=chlk$tempc,MHW=chlk$MHW,
-                KRI=ifelse(chlk$recind<0.16,"Low KRI","High KRI"))
+summary(chlk$chlm)
 
-                
+chlk$chlc<-ifelse(chlk$chlm<median(na.omit(chlk$chlm)),"Low","High")
+chlk$chlc[is.na(chlk$chlc)]<-"Low"
+
+median(chlk$recind)
+
+kdf<-(data.frame(CHL=chlk$chlc,SIC=chlk$sicc,SST=chlk$tempc,MHW=chlk$MHW,
+                KRI=ifelse(chlk$recind<0.16,"Low KRI","High KRI")))
+
+
 library(FactoMineR)                
 
 
@@ -172,36 +204,10 @@ mc1<-MCA(kdf, ncp = 2, ind.sup = NULL, quanti.sup =NULL,
          method="Burt", na.method="NA", tab.disj=NULL)
 
 plot(mc1,invisible=c("ind","quali.sup"),hab="quali")
-plot(mc1,invisible=c("var","quali.sup"),cex=.5,label="none")
-plot(mc1,hab="quali")
+
 
 dimdesc(mc1,axes=1:2)
 
-
-mc1$var$coord
-
-#proximity plot
-  
-write.csv(varcoord,"varcoord.csv")
-
-
-
-euclid<-read.csv("euclid.csv")
-
-euclid$imp<-1/euclid$Value
-
-ggplot(subset(euclid,KRI=="High"),aes(reorder(Distance.to,+imp),
-              imp))+geom_bar(position="identity",stat="identity")+
-  coord_flip()+
-  theme_bw()+ xlab("Variable")+ylab("Proximity")+
-  ggtitle(label="a. Proximity to high KRI")+
-
-
-ggplot(subset(euclid,KRI=="Low"),aes(reorder(Distance.to,+imp),
-                                      imp))+geom_bar(position="identity",stat="identity")+
-  coord_flip()+
-  theme_bw()+ xlab("Variable")+ylab("Proximity")+
-  ggtitle(label="b. Proximity to low KRI")
 
 
 ```
